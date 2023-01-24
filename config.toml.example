@@ -4,6 +4,6 @@ environment = ""
 index_name = "tenjin"
 
 [openai]
-api_key = "'
+api_key = ""
 embedding_model = "text-embedding-ada-002"
 dimension = 1536
