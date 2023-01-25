@@ -14,16 +14,14 @@ class OpenAIEmbedder:
         api_key: openai api key
     """
 
-    def __init__(self, model, api_key):
+    def __init__(self, model):
         """
         init openai embedder
 
         args:
             model: openai model name
-            api_key: openai api key
         """
         self.model = model
-        self.api_key = api_key
 
 
     def create(self, document_text: Union[str, List[str]]):
