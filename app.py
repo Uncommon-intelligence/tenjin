@@ -14,41 +14,45 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 
 from readers.pdf_reader import PDFReader
 
-with open('config.toml') as f:
+with open("config.toml") as f:
     config = toml.load(f)
 
-openai.api_key = config['openai']['api_key']
+openai.api_key = config["openai"]["api_key"]
 
-openai_api_key = config['openai']['api_key']
-embedding_model = config['openai']['embedding_model']
+openai_api_key = config["openai"]["api_key"]
+embedding_model = config["openai"]["embedding_model"]
 
-pinecone_api_key = config['pinecone']['api_key']
-pinecone_index_name = config['pinecone']['index_name']
-pinecone_environment = config['pinecone']['environment']
+pinecone_api_key = config["pinecone"]["api_key"]
+pinecone_index_name = config["pinecone"]["index_name"]
+pinecone_environment = config["pinecone"]["environment"]
 
 pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
 
-llm = OpenAI(openai_api_key=openai_api_key, temperature=0, max_tokens=500, model_name="text-davinci-003")
+llm = OpenAI(
+    openai_api_key=openai_api_key,
+    temperature=0,
+    max_tokens=500,
+    model_name="text-davinci-003",
+)
 index = pinecone.Index("tenjin")
 embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
+
 def vectorize_file(file):
     pdf = PDFReader(file.name)
     texts = pdf.get_text()
-    filename = file.name.removeprefix('/tmp/')
+    filename = file.name.removeprefix("/tmp/")
 
     batch_size = 200
-    
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
 
-        vectorstore.add_texts(
-            batch,
-            namespace=filename
-        )
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i : i + batch_size]
+
+        vectorstore.add_texts(batch, namespace=filename)
 
     return filename
+
 
 def ask_question(question, history, filename, memory):
     history = history or []
@@ -72,10 +76,14 @@ def ask_question(question, history, filename, memory):
         template=template,
     )
 
-    memory = memory or ConversationalBufferWindowMemory(memory_key="chat_history", input_key="question") #, buffer=buffer)
+    memory = memory or ConversationalBufferWindowMemory(
+        memory_key="chat_history", input_key="question"
+    )  # , buffer=buffer)
     chain = load_qa_chain(llm, chain_type="stuff", memory=memory, prompt=prompt)
-    output = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
-    answer = output['output_text']
+    output = chain(
+        {"input_documents": docs, "question": question}, return_only_outputs=True
+    )
+    answer = output["output_text"]
 
     ## Store this in a database
     memory.buffer
@@ -83,12 +91,15 @@ def ask_question(question, history, filename, memory):
     history.append((question, answer))
     return history, history, "", memory
 
+
 with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column(scale=1):
             # file_output = gr.File()
             filename = gr.Textbox(show_label=False, interactive=False)
-            upload_button = gr.UploadButton("Click to Upload a File", file_types=["pdf"], show_progress=True)
+            upload_button = gr.UploadButton(
+                "Click to Upload a File", file_types=["pdf"], show_progress=True
+            )
             upload_button.upload(vectorize_file, upload_button, filename)
             gr.Markdown("*Upload a PDF file to start*")
 
@@ -97,7 +108,11 @@ with gr.Blocks() as demo:
             state = gr.State()
             chatbot = gr.Chatbot()
             user_input = gr.Textbox(lines=1, placeholder="Question", show_label=False)
-            user_input.submit(ask_question, [user_input, state, filename, memory], [chatbot, state, user_input, memory])
+            user_input.submit(
+                ask_question,
+                [user_input, state, filename, memory],
+                [chatbot, state, user_input, memory],
+            )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo.launch()

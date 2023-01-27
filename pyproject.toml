@@ -15,6 +15,9 @@ pinecone-client = "^2.1.0"
 fitz = "^0.0.1.dev2"
 pymupdf = "^1.21.1"
 
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+
 [virtualenvs]
 create = true
 in-project = true
