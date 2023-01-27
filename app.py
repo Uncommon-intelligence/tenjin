@@ -1,14 +1,9 @@
 # NOTE: It looks like the chat history is being stored as an array of strings. This should be able to be serialized to JSON and stored in a database.
-# NOTE: I need to figure out a way to control costs. I think I can do this by limiting the number of documents that are searched. potentially chunking the document using LangChain's text splitting functionality.
-
 import toml
 import openai
 import argparse
 import gradio as gr
 import pinecone
-
-from connectors.pinecone import PineconeConnector
-from readers.pdf_reader import PDFReader
 
 from langchain import PromptTemplate, ConversationChain, LLMChain, VectorDBQA
 from langchain.llms import OpenAI
@@ -16,6 +11,8 @@ from langchain.chains.conversation.memory import ConversationalBufferWindowMemor
 from langchain.chains.question_answering import load_qa_chain
 from langchain.vectorstores import Pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
+
+from readers.pdf_reader import PDFReader
 
 with open('config.toml') as f:
     config = toml.load(f)
@@ -30,12 +27,6 @@ pinecone_index_name = config['pinecone']['index_name']
 pinecone_environment = config['pinecone']['environment']
 
 pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
-
-connector = PineconeConnector(
-    api_key=pinecone_api_key,
-    environment=pinecone_environment,
-    index_name=pinecone_index_name,
-)
 
 llm = OpenAI(openai_api_key=openai_api_key, temperature=0, max_tokens=500, model_name="text-davinci-003")
 index = pinecone.Index("tenjin")
