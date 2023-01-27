@@ -1,23 +1,21 @@
-# from py2neo import Graph, Node
-
-# graph = Graph("bolt://localhost:7687", auth=("neo4j", "secure1111!"))
-
-# person = Node("Person", name="Bob")
-# graph.create(person)
+# NOTE: It looks like the chat history is being stored as an array of strings. This should be able to be serialized to JSON and stored in a database.
+# NOTE: I need to figure out a way to control costs. I think I can do this by limiting the number of documents that are searched. potentially chunking the document using LangChain's text splitting functionality.
 
 import toml
 import openai
 import argparse
 import gradio as gr
+import pinecone
 
-from hashlib import sha256
 from connectors.pinecone import PineconeConnector
 from readers.pdf_reader import PDFReader
-from embedders.openai_embedder import OpenAIEmbedder
-from gpt import GPT3
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--q', type=str, help='query')
+from langchain import PromptTemplate, ConversationChain, LLMChain, VectorDBQA
+from langchain.llms import OpenAI
+from langchain.chains.conversation.memory import ConversationalBufferWindowMemory
+from langchain.chains.question_answering import load_qa_chain
+from langchain.vectorstores import Pinecone
+from langchain.embeddings.openai import OpenAIEmbeddings
 
 with open('config.toml') as f:
     config = toml.load(f)
@@ -31,37 +29,68 @@ pinecone_api_key = config['pinecone']['api_key']
 pinecone_index_name = config['pinecone']['index_name']
 pinecone_environment = config['pinecone']['environment']
 
+pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
+
 connector = PineconeConnector(
     api_key=pinecone_api_key,
     environment=pinecone_environment,
     index_name=pinecone_index_name,
 )
 
-embedder = OpenAIEmbedder(model=embedding_model)
-gpt = GPT3()
+llm = OpenAI(openai_api_key=openai_api_key, temperature=0, max_tokens=500, model_name="text-davinci-003")
+index = pinecone.Index("tenjin")
+embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
 def vectorize_file(file):
-    # uploads.append(file)
     pdf = PDFReader(file.name)
-    text = pdf.get_text_by_page()
+    texts = pdf.get_text()
     filename = file.name.removeprefix('/tmp/')
 
-    ids, embeds, meta = embedder.create(text)
-    connector.upsert(ids=ids, embeds=embeds, meta=meta, namespace=filename)
+    batch_size = 200
+    
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+
+        vectorstore.add_texts(
+            batch,
+            namespace=filename
+        )
 
     return filename
 
-def ask_question(question, history, filename):
+def ask_question(question, history, filename, memory):
     history = history or []
+    docs = vectorstore.similarity_search(question, namespace=filename, k=4)
 
-    _, query, _ = embedder.create(question)
-    result = connector.query(embed=query[0], top_k=5, namespace=filename)
-    context = [match['metadata']['text'] for match in result['matches']]
-    result = gpt.query(query=question, contexts=context)
-    answer = result['choices'][0]['text']
+    template = """
+    You are a chatbot having a converesation with a human about the contents of a PDF document.
+    You should respond to the human's question with a relevant sentence from the document as if you were the author of the document.
+    If there is more than one author, reply as if you were the author of the most relevant sentence.
+    Answers should be written in markdown format.
+
+    {context}
+
+    {chat_history}
+    Human: {question}
+    Chatbot:
+    """
+
+    prompt = PromptTemplate(
+        input_variables=["chat_history", "question", "context"],
+        template=template,
+    )
+
+    memory = memory or ConversationalBufferWindowMemory(memory_key="chat_history", input_key="question") #, buffer=buffer)
+    chain = load_qa_chain(llm, chain_type="stuff", memory=memory, prompt=prompt)
+    output = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
+    answer = output['output_text']
+
+    ## Store this in a database
+    memory.buffer
 
     history.append((question, answer))
-    return history, history, ""
+    return history, history, "", memory
 
 with gr.Blocks() as demo:
     with gr.Row():
@@ -73,10 +102,11 @@ with gr.Blocks() as demo:
             gr.Markdown("*Upload a PDF file to start*")
 
         with gr.Column(scale=4):
+            memory = gr.State()
             state = gr.State()
             chatbot = gr.Chatbot()
             user_input = gr.Textbox(lines=1, placeholder="Question", show_label=False)
-            user_input.submit(ask_question, [user_input, state, filename], [chatbot, state, user_input])
+            user_input.submit(ask_question, [user_input, state, filename, memory], [chatbot, state, user_input, memory])
 
 if __name__ == '__main__':
     demo.launch()
