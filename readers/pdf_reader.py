@@ -1,6 +1,8 @@
+import os
 import fitz
 import re
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from typing import Callable
 
 page_break = "\n---PAGE BREAK---\n"
 
@@ -20,6 +22,7 @@ class PDFReader:
             file (str): path to the pdf file
         """
         pdf = fitz.open(file)
+        self.filename = os.path.basename(file.name)
         self.text = ""
 
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -44,34 +47,21 @@ class PDFReader:
         texts = self.text_splitter.split_text(self.text)
         return texts
 
-    def get_documents(self):
+    def store_embeddings(self, vectorstore: Callable, batch_size: int = None):
         """
-        Returns the text of the pdf seperated by document
+        Stores the embeddings of the pdf in the vectorstore
+
+        Args:
+            vectorstore (Callable): vectorstore to store the embeddings in
+            batch_size (int): batch size to use when storing the embeddings
 
         Returns:
-            list : list of strings where each string is a document of the pdf
+            None
         """
         texts = self.get_text()
-        metadatas = [{"text": text} for text in texts]
+        batch_size = batch_size or 200
 
-        return self.text_splitter.create_documents(texts, metadatas=metadatas)
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i : i + batch_size]
 
-    def get_text_by_page(self):
-        """
-        Returns the text of the pdf seperated by page
-
-        Returns:
-            list : list of strings where each string is a page of the pdf
-        """
-        return self.text.split(page_break)
-
-    def get_citations(self):
-        """
-        Returns all citations in the pdf
-
-        Returns:
-            list : list of tuples where each tuple contains the citation number and the text
-        """
-        citations = re.findall(r"\[([\d]*)\].*?\.(.*?)\.", self.text)
-
-        return citations
+            vectorstore.add_texts(batch, namespace=self.filename)
