@@ -3,6 +3,7 @@ import toml
 import openai
 import gradio as gr
 import pinecone
+import uuid
 
 from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
@@ -38,11 +39,21 @@ embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
 
-def vectorize_file(file):
-    reader = PDFReader(file)
+def vectorize_file(file, index_name:str=None):
+    reader = PDFReader(file, index_name=index_name)
     reader.store_embeddings(vectorstore)
 
     return reader.filename
+
+def vectorise_files(files):
+    # generate a uuid for the index name
+    index_name = str(uuid.uuid4())
+
+    for file in files:
+        vectorize_file(file, index_name=index_name)
+
+    print('done')
+    return index_name, "✔️ Upload completed"
 
 
 def ask_question(question, history, filename, memory=None):
@@ -69,26 +80,25 @@ def ask_question(question, history, filename, memory=None):
 
 
 with gr.Blocks() as demo:
-    with gr.Row():
-        with gr.Column(scale=1):
-            # file_output = gr.File()
-            filename = gr.Textbox(show_label=False, interactive=False)
-            upload_button = gr.UploadButton(
-                "Click to Upload a File", file_types=["pdf"]
-            )
-            upload_button.upload(vectorize_file, upload_button, filename)
-            gr.Markdown("*Upload a PDF file to start*")
+    filename = gr.State()
 
-        with gr.Column(scale=4):
-            memory = gr.State()
-            state = gr.State()
-            chatbot = gr.Chatbot()
-            user_input = gr.Textbox(lines=1, placeholder="Question", show_label=False)
-            user_input.submit(
-                ask_question,
-                [user_input, state, filename, memory],
-                [chatbot, state, user_input, memory],
-            )
+    with gr.Tab("Documents"):
+        files = gr.Files(file_count="multiple", file_types=["pdf"])
+        status = gr.Markdown()
+        files.upload(vectorise_files, files,  [filename, status])
+
+    with gr.Tab("Chat"):
+        memory = gr.State()
+        state = gr.State()
+        chatbot = gr.Chatbot()
+        user_input = gr.Textbox(lines=1, placeholder="Question", show_label=False)
+        user_input.submit(
+            ask_question,
+            [user_input, state, filename, memory],
+            [chatbot, state, user_input, memory],
+        )
+
+
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(enable_queue=True, debug=True)

@@ -17,6 +17,7 @@ pymupdf = "^1.21.1"
 fastapi = "^0.89.1"
 uvicorn = "^0.20.0"
 pydantic = "^1.10.4"
+google-api-python-client = "^2.77.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"

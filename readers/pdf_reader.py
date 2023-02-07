@@ -14,7 +14,7 @@ class PDFReader:
     allows for extracting text from a pdf file and parsing it for citations.
     """
 
-    def __init__(self, file):
+    def __init__(self, file, index_name:str=None):
         """
         Opens the pdf file and extracts the text
 
@@ -23,6 +23,7 @@ class PDFReader:
         """
         pdf = fitz.open(file)
         self.filename = os.path.basename(file.name)
+        self.index_name = index_name or self.filename
         self.text = ""
 
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -63,5 +64,6 @@ class PDFReader:
 
         for i in range(0, len(texts), batch_size):
             batch = texts[i : i + batch_size]
+            print("processing ", self.filename)
 
-            vectorstore.add_texts(batch, namespace=self.filename)
+            vectorstore.add_texts(batch, namespace=self.index_name)
