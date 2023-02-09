@@ -1,13 +1,16 @@
 .PHONY: run_gradio run_api lint
 
-run: api
+run: dev
 
 gradio:
 	poetry run python app.py
 
-api:
+server:
+	poetry run uvicorn tenjin.main:app --workers 6 --host 0.0.0.0 --port 8000
+
+dev:
 	docker-compose up -d localstack 
-	poetry run uvicorn api:app --reload
+	poetry run server
 
 conversation:
 	docker-compose up -d localstack 
