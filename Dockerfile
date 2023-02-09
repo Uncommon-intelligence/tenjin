@@ -1,8 +1,22 @@
-FROM python:3.9-alpine
+# Use an official Python runtime as the base image
+FROM python:3.10-slim
 
-RUN apk add --no-cache build-base
+RUN apt update
+RUN apt-get install curl make -y
+RUN curl -sSL https://install.python-poetry.org | python -
+ENV PATH="/root/.local/bin:$PATH"
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 
-COPY . .
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the application code into the container
+COPY . /app
+
+
+
+# Install the dependencies using poetry
+RUN poetry install --no-root
+
+# Command to run the application
+ENTRYPOINT ["make", "server"]

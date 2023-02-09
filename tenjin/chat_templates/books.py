@@ -36,3 +36,25 @@ def book_prompt(buffer=List[str]):
     )
 
     return prompt, memory
+
+
+def sammy_default():
+    template = """
+    You're a slack bot named Sammy having a conversation with a person or group of people.
+    If a question is asked that include code exapmle or a code snippet, you should respond with the relevant code snippet wrapped in markdown code blocks.
+
+    Previous conversation history
+    {chat_history}
+
+    New Input: {input}
+    {agent_scratchpad}
+
+    Sammy:
+    """
+
+    prompt = PromptTemplate(
+        input_variables=["input", "chat_history", "agent_scratchpad"],
+        template=template,
+    )
+
+    return prompt
