@@ -7,11 +7,12 @@ import gradio as gr
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.agents import Tool, initialize_agent
 from langchain.chains.conversation.memory import ConversationalBufferWindowMemory
-from langchain.utilities import GoogleSearchAPIWrapper
+from langchain.utilities import GoogleSearchAPIWrapper, WolframAlphaAPIWrapper
 
 api_key = os.environ.get("OPENAI_API_KEY")
 google_api_key = os.environ.get("GOOGLE_API_KEY")
 google_cse_id = os.environ.get("GOOGLE_CSE_ID")
+woflram_alpha_app_id = os.environ.get("WOLFRAM_ALPHA_APP_ID")
 s3_endpoint_url = os.environ.get("S3_ENDPOINT_URL")
 
 conversation_bucket = "tenjin-conversations"
@@ -22,14 +23,17 @@ if api_key is None or google_api_key is None or google_cse_id is None:
         api_key = config["openai"]["api_key"]
         google_api_key = config["google"]["api_key"]
         google_cse_id = config["google"]["cse_id"]
+        woflram_alpha_app_id = config["wolfram"]["app_id"]
         s3_endpoint_url = config["aws"]["s3_endpoint_url"]
         conversation_bucket = config["aws"]["conversation_bucket"] or conversation_bucket
 
 os.environ["OPENAI_API_KEY"] = api_key
 os.environ["GOOGLE_API_KEY"] = google_api_key
 os.environ["GOOGLE_CSE_ID"] = google_cse_id
+os.environ["WOLFRAM_ALPHA_APPID"] = woflram_alpha_app_id
 
 search = GoogleSearchAPIWrapper()
+wolfram = WolframAlphaAPIWrapper()
 
 s3 = boto3.client(
     "s3",
@@ -59,6 +63,11 @@ tools = [
         name="Google Search",
         func=search.run,
         description="useful for when you need to answer questions about current events. You should ask targeted questions",
+    ),
+    Tool(
+        name="Wolfram Alpha",
+        func=wolfram.run,
+        description=" Useful for when you need to answer questions about Math, Science, Technology, Culture, Society and Everyday Life. Input should be a search query."
     )
 ]
 
@@ -82,12 +91,13 @@ TOOLS:
 Sammy has access to the following tools:
 
 > Google Search: useful for when you need to answer questions about current events. You should ask targeted questions.
+> Wolfram Alpha: Useful for when you need to answer questions about Math, Science, Technology, Culture, Society and Everyday Life. Input should be a search query.
 
 To use a tool, please use the following format:
 
 ```
 Thought: Do I need to use a tool? Yes
-Action: the action to take, should be one of [Google Search]
+Action: the action to take, should be one of [Google Search, Wolfram Alpha]
 Action Input: the input to the action
 Observation: the result of the action
 ```
