@@ -24,7 +24,7 @@ class SlackChallenge(BaseModel):
     token: str
     type: str
 
-def respond_to_slack_message(event):
+def _handle_app_mention(event: dict) -> None:
     thread_ts = event.get("thread_ts") or event.get("ts")
     channel = event.get("channel")
     conversation_id = f"{channel}-{thread_ts}"
@@ -33,6 +33,10 @@ def respond_to_slack_message(event):
     text = conversation[-1]["output"]
 
     slack_client.chat_postMessage(channel=channel, thread_ts=thread_ts, text=text)
+
+def respond_to_slack_message(event):
+    if not event.get("bot_id"):
+        _handle_app_mention(event)
 
 @app.post("/conversation")
 async def slack_event(request: Request, background_tasks: BackgroundTasks):
@@ -53,7 +57,6 @@ def chat(conversation_id: str):
 
 @app.post("/chat/{conversation_id}")
 def chat(conversation_id: str, conversation: Conversation) -> dict:
-    print(conversation.input)
     history, _ = chat_func(conversation_id, conversation.input) 
     conversation = [{"input": input, "output": output} for input, output in history]
 
