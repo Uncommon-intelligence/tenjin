@@ -58,7 +58,7 @@ tools = [
     Tool(
         name="Google Search",
         func=search.run,
-        description="Search the web with Google",
+        description="useful for when you need to answer questions about current events. You should ask targeted questions",
     )
 ]
 
@@ -81,7 +81,7 @@ TOOLS:
 
 Sammy has access to the following tools:
 
-> Google Search: Search the web with Google
+> Google Search: useful for when you need to answer questions about current events. You should ask targeted questions.
 
 To use a tool, please use the following format:
 

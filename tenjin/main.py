@@ -14,7 +14,8 @@ slack_token = os.environ.get("SLACK_TOKEN")
 
 if slack_token is None:
     with open("config.toml") as f:
-        slack_token = f["slack"]["token"]
+        config = toml.load(f)
+        slack_token = config["slack"]["token"]
 
 app = FastAPI()
 slack_client = WebClient(token=slack_token)
