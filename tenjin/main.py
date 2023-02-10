@@ -1,24 +1,18 @@
 #!/usr/bin/env python
 import os
-import sys
-sys.path.append("../tenjin")
-
-import toml
 from typing import Optional, Union
 from fastapi import BackgroundTasks, FastAPI, Request
 from pydantic import BaseModel
 from slack_sdk import WebClient
+import tenjin.config
 from tenjin.conversation import load_conversation_chain, chat as chat_func
+from dotenv import load_dotenv
 
-slack_token = os.environ.get("SLACK_TOKEN")
-
-if slack_token is None:
-    with open("config.toml") as f:
-        config = toml.load(f)
-        slack_token = config["slack"]["token"]
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(dotenv_path)
 
 app = FastAPI()
-slack_client = WebClient(token=slack_token)
+slack_client = WebClient(token=tenjin.config.slack_token)
 
 
 class Conversation(BaseModel):
