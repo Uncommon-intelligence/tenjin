@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 openai = "^0.26.4"
-langchain = "^0.0.72"
+langchain = "0.0.091"
 gradio = "^3.16.2"
 toml = "^0.10.2"
 pinecone-client = "^2.1.0"
