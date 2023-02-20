@@ -10,8 +10,8 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.vectorstores import Pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 
-from readers.pdf_reader import PDFReader
-from chat_templates.books import book_prompt
+from tenjin.readers.pdf_reader import PDFReader
+from tenjin.chat_templates.books import book_prompt
 
 with open("config.toml") as f:
     config = toml.load(f)

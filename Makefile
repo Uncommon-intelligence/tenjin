@@ -5,6 +5,8 @@ echo:
 
 run: dev
 
+document-demo:
+	poetry run python -m demos.document-search
 
 server:
 	poetry run uvicorn tenjin.main:app --workers 6 --host 0.0.0.0 --port 8000
@@ -23,10 +25,14 @@ test_watch:
 	poetry run pytest tests/unit_tests
 
 help:
-	@echo '----'
+	@echo '--------------'
 	@echo 'dev                 - Run app in dev mode'
 	@echo 'server              - Run app in server mode'
 	@echo 'lint                - run linters'
 	@echo 'test                - run unit tests'
 	@echo 'test_watch          - run unit tests in watch mode'
 	@echo 'integration_tests   - run integration tests'
+	@echo '--------------'
+	@echo 'DEMOS'
+	@echo '--------------'
+	@echo 'document-demo       - Run document search demo'

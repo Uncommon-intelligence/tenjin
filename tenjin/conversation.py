@@ -8,7 +8,6 @@ from langchain.agents import Tool, initialize_agent
 from langchain.chains.conversation.memory import ConversationalBufferWindowMemory
 from langchain.utilities import GoogleSearchAPIWrapper, WolframAlphaAPIWrapper
 from tenjin.utils.storage import store_conversation_data, fetch_conversation_data
-from tenjin.prompts.base import basic_template as prompt_template
 
 search = GoogleSearchAPIWrapper()
 wolfram = WolframAlphaAPIWrapper()
@@ -32,6 +31,24 @@ llm = OpenAI(
     model_name="text-davinci-003",
 )
 
+def _update_template(template: str) -> str:
+    template = template.replace("Assistant", "Arti")
+    template = f"""
+    Today's date is February 21st 2023
+
+    When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
+
+    ```[language]
+    [code]
+    ```
+
+    where [language] is the language of the code block and [code] is the code itself.
+    and [code] is the code itself. 
+
+    {template}
+    """
+
+    return template
 
 def load_conversation_chain(conversation_id: str):
     """
@@ -46,7 +63,6 @@ def load_conversation_chain(conversation_id: str):
     history (obj): Fetch conversation data
     chain (obj): Chain of conversation initialized
     """
-
     history, buffer = fetch_conversation_data(conversation_id)
     memory = ConversationalBufferWindowMemory(
         k=5, memory_key="chat_history", buffer=buffer
@@ -60,7 +76,7 @@ def load_conversation_chain(conversation_id: str):
     )
 
     # assign the template, this is really kind of monkey patch, there's got to be a better way of handling this
-    chain.agent.llm_chain.prompt.template = prompt_template()
+    chain.agent.llm_chain.prompt.template = _update_template(chain.agent.llm_chain.prompt.template)
 
     return history, chain
 
