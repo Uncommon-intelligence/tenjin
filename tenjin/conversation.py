@@ -31,25 +31,6 @@ llm = OpenAI(
     model_name="text-davinci-003",
 )
 
-def _update_template(template: str) -> str:
-    template = template.replace("Assistant", "Arti")
-    template = f"""
-    Today's date is February 21st 2023
-
-    When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
-
-    ```[language]
-    [code]
-    ```
-
-    where [language] is the language of the code block and [code] is the code itself.
-    and [code] is the code itself. 
-
-    {template}
-    """
-
-    return template
-
 def load_conversation_chain(conversation_id: str):
     """
     This function initializes a chatbot's conversation chain.
@@ -67,16 +48,14 @@ def load_conversation_chain(conversation_id: str):
     memory = ConversationalBufferWindowMemory(
         k=5, memory_key="chat_history", buffer=buffer
     )
+
     chain = initialize_agent(
         tools=tools,
         llm=llm,
-        agent="conversational-react-description",
+        agent_path="./tenjin/agents/default.json",
         verbose=True,
         memory=memory,
     )
-
-    # assign the template, this is really kind of monkey patch, there's got to be a better way of handling this
-    chain.agent.llm_chain.prompt.template = _update_template(chain.agent.llm_chain.prompt.template)
 
     return history, chain
 
