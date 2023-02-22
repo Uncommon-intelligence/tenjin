@@ -1,17 +1,19 @@
 import os
 import uuid
-import tenjin.config
-from typing import List, Union, Callable
+from typing import Callable, List, Union
+
 from dotenv import load_dotenv
 from langchain import OpenAI, PromptTemplate
-from tenjin.utils.storage import store_conversation_data, fetch_conversation_data
-from langchain.prompts import PromptTemplate
-from langchain.utilities import GoogleSearchAPIWrapper
-from langchain.docstore.document import Document
 from langchain.chains import LLMChain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from langchain.docstore.document import Document
+from langchain.prompts import PromptTemplate
 from langchain.vectorstores.faiss import FAISS
-from langchain.embeddings.openai import OpenAIEmbeddings
+from tenjin.actions import GoogleSearch
+
+import tenjin.config
+from tenjin.utils.storage import (fetch_conversation_data,
+                                  store_conversation_data)
 
 llm = OpenAI(
     temperature=0,
@@ -19,9 +21,7 @@ llm = OpenAI(
     model_name="text-davinci-003",
 )
 
-search = GoogleSearchAPIWrapper()
-
-
+google_search = GoogleSearch(llm=llm, k=10)
 
 template = """
 You are a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics.
@@ -56,45 +56,6 @@ TOOL: [Write the name of the tool you would use here]
 
 TOOL_PROMPT = PromptTemplate(template=tool_picker_template, input_variables=["query", "tools"])
 
-websearch_template = """
-Based on the following requests, parse out the information where a Google search may be required.
-If the query is based on a timeframe, assume the current date is February 22, 2023 unless otherwise specified.
-If you think that you can answer the question without a Google search, respond with NONE.
-Write the query, and respond with ONLY the query you would submit to Google. do not include quotation marks.
-
-{query}
-
-QUERY: [Write your query here]
-"""
-
-SEARCH_PROMPT = PromptTemplate(template=websearch_template, input_variables=["query"])
-
-
-
-def get_web_results(query: str) -> List[dict]:
-    chain = LLMChain(llm=llm, prompt=SEARCH_PROMPT)
-    search_term = chain.run(query)
-
-    if search_term == "NONE":
-        return []
-
-    results = search.results(search_term, 10)
-    sources = []
-
-    for result in results:
-        sources.append(Document(
-            page_content=result["snippet"],
-            metadata={
-                "type": "Google Search",
-                "term": search_term,
-                "source": result["link"],
-                "title": result["title"],
-                "content": result["snippet"],
-            },
-        ))
-
-    search_index = FAISS.from_documents(sources, OpenAIEmbeddings())
-    return search_index.similarity_search(search_term, k=3)
 
 def placeholder(query: str) -> List[dict]:
     return []
@@ -103,7 +64,7 @@ TOOLS = [
     {
         "name": "Google Search",
         "description": "Useful for when you need to answer questions about current events. You should ask targeted questions",
-        "command": get_web_results,
+        "command": google_search.run,
     },
     {
         "name": "Wolfram Alpha",
@@ -130,7 +91,6 @@ def determine_the_proper_tool(query: str) -> Callable[[str], List[dict]]:
 def run(query: str) -> dict:
     tool = determine_the_proper_tool(query)
     docs = tool(query)
-    web = get_web_results(query)
     chain = load_qa_with_sources_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
     output = chain({"input_documents": docs, "question": query})
     # tool = determine_the_proper_tool(query)
