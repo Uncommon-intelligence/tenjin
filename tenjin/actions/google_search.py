@@ -8,7 +8,7 @@ from typing import List
 
 search = GoogleSearchAPIWrapper()
 
-websearch_template = """
+template = """
 Based on the following requests, parse out the information where a Google search may be required.
 If the query is based on a timeframe, assume the current date is February 22, 2023 unless otherwise specified.
 If you think that you can answer the question without a Google search, respond with NONE.
@@ -19,7 +19,7 @@ Write the query, and respond with ONLY the query you would submit to Google. do 
 QUERY: [Write your query here]
 """
 
-SEARCH_PROMPT = PromptTemplate(template=websearch_template, input_variables=["query"])
+SEARCH_PROMPT = PromptTemplate(template=template, input_variables=["query"])
 
 
 class GoogleSearch:
