@@ -8,6 +8,8 @@ from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 import tenjin.config
 from tenjin.actions import Conductor
 
+from langchain.chains import SequentialChain
+
 llm = OpenAI(
     temperature=0,
     max_tokens=1000,
@@ -31,11 +33,33 @@ FINAL ANSWER:"""
 
 PROMPT = PromptTemplate(template=template, input_variables=["summaries", "question"])
 
+chat_template = """
+You are a tool that converts the information provided in a summary into German.
+
+SUMMARIES:
+{research}
+
+QUESTION: {question}
+AI RESPONSE:
+"""
+
+PROMPT2 = PromptTemplate(template=chat_template, input_variables=["research", "question"])
+
 def run(query: str) -> dict:
     conductor = Conductor(llm=llm)
     action = conductor.route(query)
     docs = action(query)
-    chain = load_qa_with_sources_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT)
+    research_chain = load_qa_with_sources_chain(llm, chain_type="stuff", verbose=True, prompt=PROMPT, output_key="research")
+    chat_chain = LLMChain(llm=llm, prompt=PROMPT2, verbose=True, output_key="response")
+    # output = research_chain({"input_documents": docs, "question": query})
+
+    chain = SequentialChain(
+        chains=[research_chain, chat_chain],
+        input_variables=["input_documents", "question"],
+        output_variables=["research", "response"],
+        verbose=True
+    )
+
     output = chain({"input_documents": docs, "question": query})
 
     return output
