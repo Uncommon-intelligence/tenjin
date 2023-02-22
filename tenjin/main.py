@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from slack_sdk import WebClient
 import tenjin.config
 from tenjin.conversation import load_conversation_chain, chat as chat_func
+import tenjin.question_answer
 import uuid
 from dotenv import load_dotenv
 
@@ -96,7 +97,13 @@ def web_chat(conversation: Conversation, conversation_id: Union[str, None] = Non
     history = chat_func(conversation_id, conversation.input)
     conversation = [{"input": input, "output": output} for input, output in history]
 
-    return {"history": conversation, "conversation_id": uuid}
+    return {"history": conversation, "conversation_id": str(uuid.uuid4())}
+
+@app.post("/qa/{conversation_id}")
+def qa(conversation: Conversation, conversation_id: Union[str, None] = None) -> dict:
+    history = tenjin.question_answer.run(conversation.input)
+
+    return {"history": history, "conversation_id": ""}
 
 
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:

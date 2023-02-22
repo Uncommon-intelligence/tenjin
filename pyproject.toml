@@ -22,6 +22,8 @@ boto3 = "^1.26.66"
 slack-sdk = "^3.19.5"
 wolframalpha = "^5.0.0"
 python-dotenv = "^0.21.1"
+tiktoken = "^0.2.0"
+faiss-cpu = "^1.7.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
