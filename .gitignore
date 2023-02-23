@@ -5,6 +5,7 @@ config.toml
 .localstack
 dist/
 .env
+.pytest_cache/
 
 # dependencies
 node_modules/

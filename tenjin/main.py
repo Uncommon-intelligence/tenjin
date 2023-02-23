@@ -20,11 +20,14 @@ class Conversation(BaseModel):
     challenge: Optional[str] = None
     input: Optional[str] = None
 
-
 class SlackChallenge(BaseModel):
     challenge: str
     token: str
     type: str
+
+class QARequest(BaseModel):
+    input: str
+    conversation_id: Optional[str] = None
 
 
 def _handle_app_mention(event: dict) -> None:
@@ -99,11 +102,14 @@ def web_chat(conversation: Conversation, conversation_id: Union[str, None] = Non
 
     return {"history": conversation, "conversation_id": str(uuid.uuid4())}
 
-@app.post("/qa/{conversation_id}")
-def qa(conversation: Conversation, conversation_id: Union[str, None] = None) -> dict:
-    history = tenjin.question_answer.run(conversation.input)
+@app.post("/qa")
+async def qa(req: QARequest) -> dict:
+    if req.conversation_id is None:
+        req.conversation_id = str(uuid.uuid4())
 
-    return {"history": history, "conversation_id": ""}
+    output = tenjin.question_answer.run(req.conversation_id, req.input)
+
+    return {"output": output, "conversation_id": req.conversation_id}
 
 
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:

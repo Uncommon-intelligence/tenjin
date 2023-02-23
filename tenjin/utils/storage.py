@@ -21,17 +21,27 @@ def store_conversation_data(file_name: str, payload: dict) -> None:
     """
     s3.put_object(Bucket=conversation_bucket, Key=file_name, Body=json.dumps(payload))
 
-
-def fetch_conversation_data(file_name: str):
+def _fetch_history_data(file_name: str) -> dict:
     try:
         response = s3.get_object(Bucket=conversation_bucket, Key=file_name)
         json_data = response["Body"].read().decode("utf-8")
 
-        conversation = json.loads(json_data)
+        data = json.loads(json_data)
     except:
-        conversation = {}
+        data = {}
 
+    return data
+
+
+def fetch_conversation_data(file_name: str):
+    conversation = _fetch_history_data(file_name)
     history = conversation.get("history", [])
     buffer = conversation.get("buffer", [])
 
     return history, buffer
+
+def fetch_qa_data(file_name: str):
+    qa = _fetch_history_data(file_name)
+    buffer = qa.get("buffer", [])
+
+    return buffer
