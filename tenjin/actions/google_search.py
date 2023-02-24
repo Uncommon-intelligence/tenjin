@@ -63,4 +63,4 @@ class GoogleSearch:
             )
 
         search_index = FAISS.from_documents(sources, OpenAIEmbeddings())
-        return search_index.similarity_search(search_term, k=6)
+        return search_index.similarity_search(search_term, k=3)

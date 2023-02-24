@@ -1,26 +1,13 @@
-from typing import Callable, List
+from typing import Tuple, List
 
 from langchain.agents import Tool
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
+from langchain.agents import initialize_agent, load_tools
+from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
+from langchain.docstore.base import Document
 
 from tenjin.actions.google_search import GoogleSearch
-
-template = """
-Based on the following requests, determine the proper tool to use.
-If you believe that you can answer the question without using a tool, respond with NONE.
-Write the name of the tool you would use. Do not include quotation marks.
-
---- TOOLS ---
-{tools}
--------------
-
-QUERY: {query}
-
-TOOL: [Write the name of the tool you would use here]
-"""
-
-PROMPT = PromptTemplate(template=template, input_variables=["query", "tools"])
 
 
 def placeholder(query: str) -> List[dict]:
@@ -48,15 +35,40 @@ class Conductor:
                 func=placeholder,
                 description="Useful for when you need to answer questions about legal documents. Input should be a search query.",
             ),
+            Tool(
+                name="Read documents",
+                func=placeholder,
+                description="Useful",
+            ),
         ]
 
-    def route(self, query: str) -> Callable[[str], List[dict]]:
-        tools = [f"{tool.name}: {tool.description}" for tool in self.tools]
-        tools = "\n".join(tools)
-        chain = LLMChain(llm=self.llm, prompt=PROMPT)
-        tool_name = chain.run(query=query, tools=tools)
+    def run(self, query: str) -> Tuple[str, List[Document]]:
+        prompt = ZeroShotAgent.create_prompt(
+            tools=self.tools,
+            prefix="Answer the following questions as best you can. You have access to the following tools:",
+            suffix="Begin!\n\nQuestion: {input}\nThought:{agent_scratchpad}",
+            input_variables=["input", "agent_scratchpad"],
+        )
 
-        for tool in self.tools:
-            if tool.name == tool_name:
-                return tool.func
-            pass
+        llm_chain = LLMChain(llm=self.llm, prompt=prompt)
+        tool_names = [tool.name for tool in self.tools]
+        agent = ZeroShotAgent(
+            llm_chain=llm_chain,
+            allowed_tools=tool_names,
+            return_intermediate_steps=True,
+            max_iterations=5,
+        )
+        agent_executor = AgentExecutor.from_agent_and_tools(
+            agent=agent, tools=self.tools, verbose=True, return_intermediate_steps=True
+        )
+
+        response = agent_executor({"input": query})
+        output = response["output"]
+        steps = response["intermediate_steps"]
+        sources = []
+
+        for step in steps:
+            if step[0].tool != "None":
+                sources.extend(step[1])
+
+        return output, sources

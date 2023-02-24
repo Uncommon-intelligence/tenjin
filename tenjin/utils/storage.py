@@ -19,7 +19,6 @@ def store_conversation_data(file_name: str, payload: dict) -> None:
     Returns:
         None: This function does not return anything.
     """
-    print("------------------------", payload)
     s3.put_object(Bucket=conversation_bucket, Key=file_name, Body=json.dumps(payload))
 
 
