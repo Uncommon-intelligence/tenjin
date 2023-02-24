@@ -20,10 +20,12 @@ class Conversation(BaseModel):
     challenge: Optional[str] = None
     input: Optional[str] = None
 
+
 class SlackChallenge(BaseModel):
     challenge: str
     token: str
     type: str
+
 
 class QARequest(BaseModel):
     input: str
@@ -95,12 +97,16 @@ def chat(conversation_id: str, conversation: Conversation) -> dict:
 
     return {"history": conversation}
 
+
 @app.post("/web/{conversation_id}")
-def web_chat(conversation: Conversation, conversation_id: Union[str, None] = None) -> dict:
+def web_chat(
+    conversation: Conversation, conversation_id: Union[str, None] = None
+) -> dict:
     history = chat_func(conversation_id, conversation.input)
     conversation = [{"input": input, "output": output} for input, output in history]
 
     return {"history": conversation, "conversation_id": str(uuid.uuid4())}
+
 
 @app.post("/qa")
 async def qa(req: QARequest) -> dict:
@@ -109,7 +115,7 @@ async def qa(req: QARequest) -> dict:
 
     output = tenjin.question_answer.run(req.conversation_id, req.input)
 
-    return {"output": output, "conversation_id": req.conversation_id}
+    return {"data": output, "conversation_id": req.conversation_id}
 
 
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:

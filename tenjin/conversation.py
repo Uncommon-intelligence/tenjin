@@ -31,6 +31,7 @@ llm = OpenAI(
     model_name="text-davinci-003",
 )
 
+
 def load_conversation_chain(conversation_id: str):
     """
     This function initializes a chatbot's conversation chain.

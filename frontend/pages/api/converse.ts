@@ -11,11 +11,8 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    const id = req.body.conversationId || uuidV4();
-    const { data } = await axios.post(`https://timmy-dev.ngrok.io/proxy/8000/web/${id}`, {
-        conversationId: id,
-        input: req.body.input,
-    })
+    const { conversationId: conversation_id, input } = req.body
+    const { data } = await axios.post(`https://timmy.ngrok.io/qa`, { conversation_id, input })
 
     res.status(200).json({ data });
 }

@@ -10,7 +10,6 @@ search = GoogleSearchAPIWrapper()
 
 template = """
 Based on the following requests, parse out the information where a Google search may be required.
-If the query is based on a timeframe, assume the current date is February 22, 2023 unless otherwise specified.
 If you think that you can answer the question without a Google search, respond with NONE.
 Write the query, and respond with ONLY the query you would submit to Google. do not include quotation marks.
 
@@ -26,6 +25,7 @@ class GoogleSearch:
     """
     Wrapper around Google Search API that returns a list of results, sources, and metadata.
     """
+
     def __init__(self, llm: LLMChain, k=10):
         self.k = k
         self.llm = llm
@@ -49,16 +49,18 @@ class GoogleSearch:
         sources = []
 
         for result in results:
-            sources.append(Document(
-                page_content=result["snippet"],
-                metadata={
-                    "type": "Google Search",
-                    "term": search_term,
-                    "source": result["link"],
-                    "title": result["title"],
-                    "content": result["snippet"],
-                },
-            ))
+            sources.append(
+                Document(
+                    page_content=result["snippet"],
+                    metadata={
+                        "type": "Google Search",
+                        "term": search_term,
+                        "source": result["link"],
+                        "title": result["title"],
+                        "content": result["snippet"],
+                    },
+                )
+            )
 
         search_index = FAISS.from_documents(sources, OpenAIEmbeddings())
-        return search_index.similarity_search(search_term, k=3)
+        return search_index.similarity_search(search_term, k=6)

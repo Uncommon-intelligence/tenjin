@@ -1,6 +1,7 @@
 import { ChatContext } from "@/app/page"
 import { useContext } from "react"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 const ChatHistory = () => {
     const { history } = useContext(ChatContext)
@@ -10,7 +11,7 @@ const ChatHistory = () => {
             {history?.map(({input, output}) => (
                 <div className="flex flex-col gap-2">
                     <strong className="text-xl text-gray-300">{input}</strong>
-                    <ReactMarkdown children={output} />
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} children={output} />
                 </div>
             ))}
         </div>

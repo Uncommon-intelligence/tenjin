@@ -22,6 +22,7 @@ TOOL: [Write the name of the tool you would use here]
 
 PROMPT = PromptTemplate(template=template, input_variables=["query", "tools"])
 
+
 def placeholder(query: str) -> List[dict]:
     return []
 

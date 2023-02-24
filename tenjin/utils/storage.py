@@ -19,7 +19,9 @@ def store_conversation_data(file_name: str, payload: dict) -> None:
     Returns:
         None: This function does not return anything.
     """
+    print("------------------------", payload)
     s3.put_object(Bucket=conversation_bucket, Key=file_name, Body=json.dumps(payload))
+
 
 def _fetch_history_data(file_name: str) -> dict:
     try:
@@ -39,9 +41,3 @@ def fetch_conversation_data(file_name: str):
     buffer = conversation.get("buffer", [])
 
     return history, buffer
-
-def fetch_qa_data(file_name: str):
-    qa = _fetch_history_data(file_name)
-    buffer = qa.get("buffer", [])
-
-    return buffer

@@ -4,23 +4,23 @@ import axios from "axios";
 import { useContext, useRef } from "react";
 
 const ChatForm = () => {
-    const { onSubmit, conversationId } = useContext(ChatContext);
+    const { onSubmit, conversationId, history } = useContext(ChatContext);
     const chatRef =  useRef<any>()
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         const input = chatRef.current.value;
 
-
-        const response = await axios.post(`/api/converse`, {
+        const resp = await axios.post(`/api/converse`, {
             input,
             conversationId,
         })
 
         if (input) {
-            const { history, conversation_id: conversationId } = response.data.data;
+            const { output, conversation_id: conversationId } = resp.data.data;
+            const { question, response } = output
 
-            onSubmit!(history, conversationId);
+            onSubmit!([...history, { input: question, output: response }], conversationId);
             chatRef.current.value = "";
         }
     }
