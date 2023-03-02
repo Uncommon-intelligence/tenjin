@@ -14,5 +14,5 @@ export default async function handler(
     const { conversationId: conversation_id, input } = req.body
     const { data } = await axios.post(`https://timmy.ngrok.io/qa`, { conversation_id, input })
 
-    res.status(200).json({ data });
+    res.status(200).json(data)
 }

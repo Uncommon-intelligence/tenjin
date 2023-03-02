@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Callable, List, Tuple
 
 from dotenv import load_dotenv
-from langchain import OpenAI, PromptTemplate
+from langchain import PromptTemplate
+from langchain.llms import OpenAIChat
 from langchain.chains import LLMChain, SequentialChain
 from langchain.chains.conversation.memory import ConversationalBufferWindowMemory
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
@@ -14,13 +15,9 @@ import tenjin.config
 from tenjin.actions import Conductor
 from tenjin.utils.storage import fetch_conversation_data, store_conversation_data
 
-llm = OpenAI(
-    temperature=0,
-    max_tokens=1000,
-    model_name="text-davinci-003",
-)
+llm = OpenAIChat(temperature=0)
 
-template = """
+prefix_content = """
 Arti is designed to be a research assistent able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Arti is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 Arti is able use external resourcecs to provide more context to the conversation. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Arti is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
 
@@ -34,27 +31,20 @@ Don't return an exact copy of the research. Instead, paraphrase the information 
 ```python
 
 ```
-
-Prior to answering the question research was conducted and the followin infomation was found:
-RESEARCH:
-{research}
-
-The following is the last few messages in the conversation:
-HISTORY:
-{history}
-
-Human: {question}
-Arti:
-[BEGIN MARKDOWN RESPONSE]
-
-[YOUR RESPONSE HERE]
-
-[END MARKDOWN RESPONSE]
 """
 
-PROMPT = PromptTemplate(
-    template=template, input_variables=["history", "question", "research"]
-)
+prefix_messages = [{
+    "role": "system",
+    "content": prefix_content,
+}]
+
+# template = """
+# {research}
+# """
+
+# PROMPT = PromptTemplate(
+#     template=template, input_variables=["history", "question", "research"]
+# )
 
 
 def load_conversation_chain(
@@ -69,25 +59,12 @@ def load_conversation_chain(
         LLMChain: The conversation chain to use for the request
     """
     history, buffer = fetch_conversation_data(conversation_id)
-    history = history or []
 
-    # TODO: Vectorize the buffers and return the top 2 that are most similar to the current query.
-    partial_buffer = buffer[-2:]
-    memory = ConversationalBufferWindowMemory(
-        memory_key="history", input_key="question", buffer=partial_buffer
-    )
-
-    return (
-        LLMChain(
-            llm=llm, prompt=PROMPT, verbose=True, output_key="response", memory=memory
-        ),
-        history,
-        buffer,
-    )
+    return history or [], buffer or []
 
 
 def run(conversation_id: str, query: str) -> dict:
-    """Invoike a conversation by routing the provided query to the appropriate transformer chains and storing the conversation history usin the ConversationBufferMemory class.
+    """Invoke a conversation by routing the provided query to the appropriate transformer chains and storing the conversation history usin the ConversationBufferMemory class.
 
     Args:
         query (str): The question or statement provided by the user.
@@ -95,26 +72,37 @@ def run(conversation_id: str, query: str) -> dict:
     Returns:
         dict: The output of the transformer chain.
     """
-    research_output, documents = Conductor(llm=llm).run(query)
-    chain, history, buffer = load_conversation_chain(conversation_id)
+    template = """Question: {question}
 
-    output = chain({"question": query, "history": "", "research": research_output})
-    buffer.append(chain.memory.buffer[-1])
+    Answer:"""
 
-    # Convert input documents to a dict so that it can be serialized to json.
-    output["sources"] = [doc.dict() for doc in documents]
+    prompt = PromptTemplate(template=template, input_variables=["question"])
+    research_output, documents = Conductor().run(query)
 
-    # Add the output to the conversation history
-    del output["history"]
-    history.append(output)
+    history, buffer = load_conversation_chain(conversation_id)
 
-    # save the conversation history to the S3
-    store_conversation_data(
-        file_name=conversation_id,
-        payload={
-            "buffer": buffer,  # Buffer is used to store the conversation history
-            "history": history,  # History is used to store the full conversation object including sources.
-        },
-    )
+    if research_output:
+        buffer.append({"role": "system", "content": research_output or ""})
+
+    llm = OpenAIChat(temperature=0, prefix_messages=prefix_messages + buffer)
+    chain = LLMChain(prompt=prompt, llm=llm)
+
+    output = chain.run(query)
+
+    buffer.append({"role": "user", "content": query})
+    buffer.append({"role": "assistant", "content": output})
+
+    history.append({
+        "user": query,
+        "assistant": output,
+        "system": research_output,
+        "sources": [doc.dict() for doc in documents[:5]] or [],
+    })
+
+    # Save the conversation history to the S3
+    store_conversation_data(file_name=conversation_id, payload={
+        "history": history,
+        "buffer": buffer,
+    })
 
     return history

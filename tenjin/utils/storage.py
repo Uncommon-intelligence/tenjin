@@ -38,5 +38,6 @@ def fetch_conversation_data(file_name: str):
     conversation = _fetch_history_data(file_name)
     history = conversation.get("history", [])
     buffer = conversation.get("buffer", [])
+    sources = conversation.get("sources", [])
 
-    return history, buffer
+    return history, sources

@@ -26,7 +26,7 @@ class GoogleSearch:
     Wrapper around Google Search API that returns a list of results, sources, and metadata.
     """
 
-    def __init__(self, llm: LLMChain, k=10):
+    def __init__(self, llm: LLMChain, k=5):
         self.k = k
         self.llm = llm
 
@@ -49,18 +49,18 @@ class GoogleSearch:
         sources = []
 
         for result in results:
-            sources.append(
-                Document(
-                    page_content=result["snippet"],
-                    metadata={
-                        "type": "Google Search",
-                        "term": search_term,
-                        "source": result["link"],
-                        "title": result["title"],
-                        "content": result["snippet"],
-                    },
+            if result.get("snippet", "") !=  "":
+                sources.append(
+                    Document(
+                        page_content=result.get("snippet", ""),
+                        metadata={
+                            "type": "Google Search",
+                            "term": search_term,
+                            "source": result.get("link", ""),
+                            "title": result.get("title", ""),
+                            "content": result.get("snippet", ""),
+                        },
+                    )
                 )
-            )
 
-        search_index = FAISS.from_documents(sources, OpenAIEmbeddings())
-        return search_index.similarity_search(search_term, k=3)
+        return sources

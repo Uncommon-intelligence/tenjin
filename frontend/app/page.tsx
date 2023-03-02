@@ -3,17 +3,36 @@ import ChatForm from "@/components/ChatForm";
 import ChatHistory from "@/components/ChatHistory";
 import { createContext, useEffect, useRef, useState } from "react";
 
-interface Conversation {
-    input: string;
-    output: string;
+interface Source {
+    page_content: string;
+    lookup_str: string;
+    lookup_index: number;
+    metadata: {
+        type: string;
+        term: string;
+        source: string;
+        title: string;
+        content: string;
+    }
+}
+
+type Conversation = {
+    user?: string;
+    assistant?: string;
+    system?: string;
+    sources: Source[];
+}
+
+interface ConversationResponse {
+    data: Conversation[]
+    conversation_id: string;
 }
 
 interface ChatProviderProps {
-    onSubmit: (response: Conversation[], conversationId: string) => void;
+    onSubmit: (response: ConversationResponse, conversationId: string) => void;
     history: Conversation[];
     conversationId: string | null;
 }
-
 
 export const ChatContext = createContext<ChatProviderProps>({
     history: [],
@@ -30,24 +49,28 @@ export default function Home() {
         chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
     }, [history])
 
+    useEffect(() => {
+        console.log(conversationId)
+    }, [conversationId])
+
     const handleSubmit = (response: Conversation[], conversationId: string) => {
-        setHistory(response); // add response to history
-        setConversationId(conversationId); // update conversationId
+        setHistory(response);
+        setConversationId(conversationId);
     };
 
     return (
-        <main className={`max-w-3xl flex h-screen gap-6 flex-col p-8 m-auto border-x border-slate-800`}>
+        <main className={`max-w-4xl flex h-screen gap-6 flex-col m-auto border-x border-slate-800`}>
             <ChatContext.Provider
                 value={{ onSubmit: handleSubmit, history, conversationId }}
             >
                 <section
                     ref={chatWindow}
                     id="responses"
-                    className="w-full flex-1 overflow-y-auto"
+                    className="w-full flex-1 overflow-y-auto p-8"
                 >
                     <ChatHistory />
                 </section>
-                <section id="chatbar" className="w-full">
+                <section id="chatbar" className="w-full p-8">
                     <ChatForm />
                 </section>
             </ChatContext.Provider>

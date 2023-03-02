@@ -17,10 +17,9 @@ const ChatForm = () => {
         })
 
         if (input) {
-            const { output, conversation_id: conversationId } = resp.data.data;
-            const { question, response } = output
+            const { data, conversation_id: conversationId } = resp.data
 
-            onSubmit!([...history, { input: question, output: response }], conversationId);
+            onSubmit!(data, conversationId);
             chatRef.current.value = "";
         }
     }
