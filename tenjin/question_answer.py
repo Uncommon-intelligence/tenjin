@@ -72,14 +72,17 @@ def run(conversation_id: str, query: str) -> dict:
     Returns:
         dict: The output of the transformer chain.
     """
-    template = """Question: {question}
 
-    Answer:"""
+    template = """
+    Question: {question}
+
+    Answer:
+    """
+
+    history, buffer = load_conversation_chain(conversation_id)
 
     prompt = PromptTemplate(template=template, input_variables=["question"])
     research_output, documents = Conductor().run(query)
-
-    history, buffer = load_conversation_chain(conversation_id)
 
     if research_output:
         buffer.append({"role": "system", "content": research_output or ""})
