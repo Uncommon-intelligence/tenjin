@@ -1,9 +1,7 @@
 from langchain.chains import LLMChain
 from langchain.docstore.document import Document
-from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.utilities import GoogleSearchAPIWrapper
-from langchain.vectorstores.faiss import FAISS
 from typing import List
 
 search = GoogleSearchAPIWrapper()

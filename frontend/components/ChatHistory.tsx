@@ -3,6 +3,22 @@ import { useContext } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+const SourceLink = ({ source }: any) => {
+    const metadata = source?.metadata
+    if (!metadata) return null
+
+    return (
+        <a
+            href={metadata.source}
+            target="_blank"
+            key={metadata.source}
+            className="text-sm border border-gray-800 px-2 py-1 rounded-full hover:bg-gray-700 transition-all hover:border-gray-600 hover:text-white"
+        >
+            {metadata.title.slice(0, 15)}
+        </a>
+    )
+}
+
 const ChatHistory = () => {
     const { history } = useContext(ChatContext);
 
@@ -22,18 +38,7 @@ const ChatHistory = () => {
                         className="text-lg text-white"
                     />
                     <div className="flex gap-2 mt-4">
-                        {sources?.map(
-                            ({ metadata }) => (
-                                <a
-                                    href={metadata?.source}
-                                    target="_blank"
-                                    key={metadata.source}
-                                    className="text-sm border border-gray-800 px-2 py-1 rounded-full hover:bg-gray-700 transition-all hover:border-gray-600 hover:text-white"
-                                >
-                                    {metadata?.title.slice(0, 15)}
-                                </a>
-                            )
-                        )}
+                        {sources?.map((source: any) => (<SourceLink source={source} />))}
                     </div>
                 </div>
             ))}

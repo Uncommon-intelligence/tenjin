@@ -1,11 +1,8 @@
-import os
 import uuid
-import tenjin.config
-from typing import List, Union
-from dotenv import load_dotenv
-from langchain import OpenAI, LLMChain, PromptTemplate
+from typing import List
+from langchain import OpenAI
 from langchain.agents import Tool, initialize_agent
-from langchain.chains.conversation.memory import ConversationalBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory
 from langchain.utilities import GoogleSearchAPIWrapper, WolframAlphaAPIWrapper
 from tenjin.utils.storage import store_conversation_data, fetch_conversation_data
 
@@ -46,7 +43,7 @@ def load_conversation_chain(conversation_id: str):
     chain (obj): Chain of conversation initialized
     """
     history, buffer = fetch_conversation_data(conversation_id)
-    memory = ConversationalBufferWindowMemory(
+    memory = ConversationBufferWindowMemory(
         k=5, memory_key="chat_history", buffer=buffer
     )
 

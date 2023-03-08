@@ -1,4 +1,3 @@
-import unittest
 from tenjin.question_answer import load_conversation_chain
 from tenjin.utils.storage import store_conversation_data
 

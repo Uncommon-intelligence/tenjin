@@ -1,72 +1,66 @@
 from typing import Tuple, List
 
 from langchain.agents import Tool
-from langchain.agents import initialize_agent, load_tools
-from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
+from langchain.agents import ZeroShotAgent, AgentExecutor
 from langchain.chains import LLMChain
 from langchain.llms import OpenAIChat
-from langchain.prompts import PromptTemplate
-from langchain.docstore.base import Document
-
-from tenjin.actions.google_search import GoogleSearch
+from tenjin.actions.bing_search import BingSearch
 
 
 def placeholder(query: str) -> List[dict]:
     return []
 
+bing = BingSearch()
+
+PREFIX = """
+You are a research assistant accessing data from the internet. Today is March 1st 2023.
+
+You have access to the following tools:
+"""
 
 class Conductor:
     def __init__(self):
         self.llm = OpenAIChat(temperature=0)
-        google_search = GoogleSearch(llm=self.llm, k=10)
 
         self.tools = [
             Tool(
-                name="Google Search",
-                func=google_search.run,
-                description="Useful for when you need to answer questions about current events. You should ask targeted questions",
-            ),
-            # Tool(
-            #     name="Wolfram Alpha",
-            #     func=placeholder,
-            #     description="Useful for when you need to answer questions about Math, Science, Technology, Culture, Society and Everyday Life. Input should be a search query.",
-            # ),
-            # Tool(
-            #     name="Legal Document",
-            #     func=placeholder,
-            #     description="Useful for when you need to answer questions about legal documents. Input should be a search query.",
-            # ),
-            Tool(
-                name="Read documents",
-                func=placeholder,
-                description="Useful",
+                name = bing.name,
+                description = bing.description,
+                func=bing.run
             ),
         ]
 
-    def run(self, query: str) -> Tuple[str, List[Document]]:
+    def run(self, query: str) -> Tuple[str, List[dict]]:
         prompt = ZeroShotAgent.create_prompt(
             tools=self.tools,
-            prefix="Answer the following questions as best you can. You have access to the following tools:",
+            prefix=PREFIX,
             suffix="Begin!\n\nQuestion: {input}\nThought:{agent_scratchpad}",
             input_variables=["input", "agent_scratchpad"],
         )
 
         llm_chain = LLMChain(llm=self.llm, prompt=prompt)
         tool_names = [tool.name for tool in self.tools]
+
         agent = ZeroShotAgent(
             llm_chain=llm_chain,
             allowed_tools=tool_names,
             return_intermediate_steps=True,
-            max_iterations=1,
+            # max_iterations=10,
         )
+
         agent_executor = AgentExecutor.from_agent_and_tools(
-            agent=agent, tools=self.tools, verbose=True, return_intermediate_steps=True
+            agent=agent,
+            tools=self.tools,
+            verbose=True,
+            return_intermediate_steps=True,
+            max_iterations=10,
         )
 
         response = agent_executor({"input": query})
+
         output = response["output"]
         steps = response["intermediate_steps"]
-        sources = []
+        sources = bing.sources(query)
 
         for step in steps:
             if step[0].tool != "None":
