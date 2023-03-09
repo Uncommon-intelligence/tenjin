@@ -14,7 +14,7 @@ class PDFReader:
     allows for extracting text from a pdf file and parsing it for citations.
     """
 
-    def __init__(self, file, index_name:str=None):
+    def __init__(self, file, index_name: str = None):
         """
         Opens the pdf file and extracts the text
 

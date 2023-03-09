@@ -1,4 +1,13 @@
 {
     "python.formatting.provider": "black",
-    "python.defaultInterpreterPath": "/home/tim/.cache/pypoetry/virtualenvs/tenjin-c82Sb6QF-py3.10"
+    "python.defaultInterpreterPath": "/home/tim/.cache/pypoetry/virtualenvs/tenjin-c82Sb6QF-py3.10",
+    "cSpell.words": [
+        "Arti",
+        "boto",
+        "chatbar",
+        "docstore",
+        "langchain",
+        "llms",
+        "tenjin"
+    ]
 }

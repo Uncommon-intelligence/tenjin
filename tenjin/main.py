@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from slack_sdk import WebClient
 import tenjin.config
 from tenjin.conversation import load_conversation_chain, chat as chat_func
+import tenjin.question_answer
 import uuid
 from dotenv import load_dotenv
 
@@ -24,6 +25,11 @@ class SlackChallenge(BaseModel):
     challenge: str
     token: str
     type: str
+
+
+class QARequest(BaseModel):
+    input: str
+    conversation_id: Optional[str] = None
 
 
 def _handle_app_mention(event: dict) -> None:
@@ -91,12 +97,25 @@ def chat(conversation_id: str, conversation: Conversation) -> dict:
 
     return {"history": conversation}
 
+
 @app.post("/web/{conversation_id}")
-def web_chat(conversation: Conversation, conversation_id: Union[str, None] = None) -> dict:
+def web_chat(
+    conversation: Conversation, conversation_id: Union[str, None] = None
+) -> dict:
     history = chat_func(conversation_id, conversation.input)
     conversation = [{"input": input, "output": output} for input, output in history]
 
-    return {"history": conversation, "conversation_id": uuid}
+    return {"history": conversation, "conversation_id": str(uuid.uuid4())}
+
+
+@app.post("/qa")
+async def qa(req: QARequest) -> dict:
+    if req.conversation_id is None:
+        req.conversation_id = str(uuid.uuid4())
+
+    output = tenjin.question_answer.run(req.conversation_id, req.input)
+
+    return {"data": output, "conversation_id": req.conversation_id}
 
 
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:

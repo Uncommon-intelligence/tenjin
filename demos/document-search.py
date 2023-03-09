@@ -88,6 +88,7 @@ def sammy_default():
 
     return prompt
 
+
 llm = OpenAI(
     openai_api_key=openai_api_key,
     temperature=0,
@@ -100,11 +101,12 @@ embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
 
-def vectorize_file(file, index_name:str=None):
+def vectorize_file(file, index_name: str = None):
     reader = PDFReader(file, index_name=index_name)
     reader.store_embeddings(vectorstore)
 
     return reader.filename
+
 
 def vectorise_files(files):
     # generate a uuid for the index name
@@ -113,7 +115,7 @@ def vectorise_files(files):
     for file in files:
         vectorize_file(file, index_name=index_name)
 
-    print('done')
+    print("done")
     return index_name, "✔️ Upload completed"
 
 
@@ -146,7 +148,7 @@ with gr.Blocks() as demo:
     with gr.Tab("Documents"):
         files = gr.Files(file_count="multiple", file_types=["pdf"])
         status = gr.Markdown()
-        files.upload(vectorise_files, files,  [filename, status])
+        files.upload(vectorise_files, files, [filename, status])
 
     with gr.Tab("Chat"):
         memory = gr.State()

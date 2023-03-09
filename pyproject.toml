@@ -7,8 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-openai = "^0.26.4"
-langchain = "0.0.091"
+openai = "0.27.0"
+langchain = "0.0.103"
 gradio = "^3.16.2"
 toml = "^0.10.2"
 pinecone-client = "^2.1.0"
@@ -22,11 +22,14 @@ boto3 = "^1.26.66"
 slack-sdk = "^3.19.5"
 wolframalpha = "^5.0.0"
 python-dotenv = "^0.21.1"
+tiktoken = "^0.2.0"
+faiss-cpu = "^1.7.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
 pytest = "^7.2.1"
 pytest-watch = "^4.2.0"
+ruff = "^0.0.254"
 
 [virtualenvs]
 create = true
@@ -38,3 +41,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 server = "tenjin:serve"
+
+[tool.ruff]
+extend-select = ["C4", "SIM", "TCH"]
+ignore = []
+show-fixes = true
+line-length = 120

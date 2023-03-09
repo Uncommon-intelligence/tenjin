@@ -1,11 +1,12 @@
 import datetime
 
+
 def today() -> str:
     """returns today's date in a human readable format
 
     Returns:
         str: todays date
-    """    
+    """
     date = datetime.datetime.now()
     # Define the format string
     date_format = "%A, %b %d %Y"
