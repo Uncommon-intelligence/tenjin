@@ -10,19 +10,7 @@ class BingSearch(BingSearchAPIWrapper):
     description = "Useful if you need to answer questions about current events. You should ask targeted questions."
 
     def sources(self, query) -> List[dict]:
-        sources = []
-        results = super().results(query, 5)
-
-        for result in results:
-            if result.get("snippet", "") !=  "":
-                sources.append({
-                    "page_content": result.get("snippet", ""),
-                    "metadata": {
-                        "type": "Bing Search",
-                        "source": result.get("link", ""),
-                        "title": result.get("title", ""),
-                        "content": result.get("snippet", ""),
-                    },
-                })
+        sources = super().results(query, 5)
+        sources = [source for source in sources if isinstance(source, dict) and source.get("snippet")]
 
         return sources

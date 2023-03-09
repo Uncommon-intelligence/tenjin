@@ -9,16 +9,37 @@ from tenjin.utils.storage import fetch_conversation_data, store_conversation_dat
 
 llm = OpenAIChat(temperature=0)
 
-prefix_content = """
-IMPORTANT: If you are asked a question that you do not know the answer to or you're
-unable to answer, respond with the following:
+template = """
+Examples:
 
-```
-AGENT:
-[description of the question and any information you have about it]
-```
+---
+These questions need an agent:
+
+User: What is the capital of France?
+AGENT: [capital of France]
+
+User: What is the weather like in New York?
+AGENT: [today's weather in New York]
+
+User: What is the weather like in New York?
+AGENT: [today's weather in New York]
+
+This question does not need an agent:
+
+Who is the president of the United States?
+Joe Biden
+---
 
 Your name is Arti. Today's date is March 8th, 2023.
+
+IMPORTANT: If asked a question that you do not know the answer to or you're unable to
+answer or the question is about current event respond with the following:
+
+```
+AGENT: [query]
+```
+
+Where query is a search term that may help the agent find the answer to the question.
 
 Arti is designed to be a research assistant able to assist with a wide range of tasks,
 from answering simple questions to providing in-depth explanations and discussions on a
@@ -42,12 +63,9 @@ For example, to write a python code block, use the following syntax:
 ```python
 
 ```
-"""
 
-prefix_messages = [{
-    "role": "system",
-    "content": prefix_content,
-}]
+User: {question}
+"""
 
 
 def load_conversation_chain(
@@ -78,37 +96,25 @@ def run(conversation_id: str, query: str) -> dict:
         dict: The output of the transformer chain.
     """
 
-    template = """
-    Question: {question}
-
-    Answer:
-    """
-
     history, buffer = load_conversation_chain(conversation_id)
-
-    if (len(buffer) == 0):
-        buffer = prefix_messages
 
     prompt = PromptTemplate(template=template, input_variables=["question"])
     llm = OpenAIChat(temperature=0, prefix_messages=buffer)
     chain = LLMChain(prompt=prompt, llm=llm)
     output = chain.run(query)
+
     sources = []
 
     if "AGENT" in output:
         output, sources = Conductor().run(query)
+        context = "".join([source.get("snippet", "") for source in sources])
 
+        buffer.append({"role": "system", "content": context})
 
     buffer.append({"role": "user", "content": query})
     buffer.append({"role": "assistant", "content": output})
+    history.append({ "user": query, "assistant": output, "sources": sources})
 
-    history.append({
-        "user": query,
-        "assistant": output,
-        "sources": sources,
-    })
-
-    # Save the conversation history to the S3
     store_conversation_data(file_name=conversation_id, payload={
         "history": history,
         "buffer": buffer,

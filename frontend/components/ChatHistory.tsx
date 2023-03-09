@@ -4,25 +4,23 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 const SourceLink = ({ source }: any) => {
-    const metadata = source?.metadata
-    if (!metadata) return null
+    if (!source) return null
+    const { snippet, title, link } = source
 
     return (
         <a
-            href={metadata.source}
+            href={link}
             target="_blank"
-            key={metadata.source}
+            key={title}
             className="text-sm border border-gray-800 px-2 py-1 rounded-full hover:bg-gray-700 transition-all hover:border-gray-600 hover:text-white"
         >
-            {metadata.title.slice(0, 15)}
+            {title.slice(0, 20)}
         </a>
     )
 }
 
 const ChatHistory = () => {
     const { history } = useContext(ChatContext);
-
-    console.log({ history })
 
     return (
         <div className="flex flex-col gap-8">
