@@ -1,36 +1,41 @@
-version: '3'
+version: '3.7'
 services:
-  neo4j:
-    image: neo4j:latest
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    environment:
-      - NEO4J_AUTH=neo4j/secure1111!
-    volumes:
-      - data:/data
-  server:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-  python:
-    build: .
-    command: python app.py
-    volumes:
-      - .:/app
-    working_dir: /app
-    links:
-      - neo4j
-  localstack:
-    image: localstack/localstack
-    ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=s3
-      - DEFAULT_REGION=us-east-1
-    volumes:
-      - "./.localstack:/var/lib/localstack"
+    server:
+        build: .
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+
+    python:
+        build: .
+        command: python app.py
+        volumes:
+            - .:/app
+        working_dir: /app
+
+    localstack:
+        image: localstack/localstack
+        ports:
+            - "4566:4566"
+        environment:
+            - SERVICES=s3
+            - DEFAULT_REGION=us-east-1
+        volumes:
+            - localstack:/var/lib/localstack
+
+    postgres:
+        image: postgres:13.3
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=dagster
+        volumes:
+            - postgres:/var/lib/postgresql/data
 volumes:
-  data:
+    postgres:
+        driver: local
+    localstack:
+        driver: local

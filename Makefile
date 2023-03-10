@@ -12,11 +12,15 @@ server:
 	poetry run uvicorn tenjin.main:app --workers 6 --host 0.0.0.0 --port 8000
 
 dev:
-	docker-compose up -d localstack 
+	docker-compose up -d localstack
 	poetry run server
 
+dagster:
+	docker-compose up -d postgres
+	poetry run dagit -f etl/main.py --host 0.0.0.0 -p 5000
+
 lint:
-	poetry run black .
+	poetry run ruff check . --fix
 
 test:
 	poetry run pytest tests/unit_tests

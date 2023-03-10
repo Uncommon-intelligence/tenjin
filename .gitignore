@@ -6,6 +6,7 @@ config.toml
 dist/
 .env
 .pytest_cache/
+.ruff_cache/
 
 # dependencies
 node_modules/
@@ -41,3 +42,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dagster
+dagster.yaml
+tmp*/
+
