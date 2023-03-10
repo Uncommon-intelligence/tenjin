@@ -25,7 +25,7 @@ Real-time transcription combined with semantic search and summarization will hel
 - node  17+
 - pnpm
 - Docker / Docker Compose
-- [Poetry](Poetry - Python dependency management and packaging made easy) 
+- [Poetry](https://python-poetry.org/) 
 
 ## Setup and Run
 
