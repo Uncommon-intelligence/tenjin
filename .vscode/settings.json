@@ -5,9 +5,13 @@
         "Arti",
         "boto",
         "chatbar",
+        "Dagster",
+        "Diarisation",
+        "diarized",
         "docstore",
         "langchain",
         "llms",
-        "tenjin"
+        "tenjin",
+        "Weaviate"
     ]
 }

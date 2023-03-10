@@ -16,6 +16,7 @@ services:
 
     localstack:
         image: localstack/localstack
+        restart: on-failure:0
         ports:
             - "4566:4566"
         environment:
@@ -26,6 +27,7 @@ services:
 
     postgres:
         image: postgres:13.3
+        restart: on-failure:0
         ports:
             - 5432:5432
         environment:
@@ -34,6 +36,19 @@ services:
             - POSTGRES_DB=dagster
         volumes:
             - postgres:/var/lib/postgresql/data
+
+    weaviate:
+        image: semitechnologies/weaviate:1.18.0
+        restart: on-failure:0
+        ports:
+            - "9000:8080"
+        environment:
+            - QUERY_DEFAULTS_LIMIT=20
+            - AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true
+            - PERSISTENCE_DATA_PATH="./data"
+            - DEFAULT_VECTORIZER_MODULE=none
+            - CLUSTER_HOSTNAME=node1
+
 volumes:
     postgres:
         driver: local
