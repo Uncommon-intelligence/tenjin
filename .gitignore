@@ -47,3 +47,4 @@ next-env.d.ts
 dagster.yaml
 tmp*/
 
+keys/google_service_account.json

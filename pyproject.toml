@@ -28,6 +28,9 @@ dagster = "^1.2.0"
 dagit = "^1.2.0"
 pandas = "^1.5.3"
 pysqlite3 = "^0.5.0"
+google-auth = "^2.16.2"
+google-auth-oauthlib = "^1.0.0"
+google-auth-httplib2 = "^0.1.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
