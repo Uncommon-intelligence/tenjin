@@ -4,13 +4,17 @@
     "cSpell.words": [
         "Arti",
         "boto",
+        "capfd",
         "chatbar",
+        "creds",
         "Dagster",
         "Diarisation",
         "diarized",
         "docstore",
+        "googleapiclient",
         "langchain",
         "llms",
+        "subfolders",
         "tenjin",
         "Weaviate"
     ]
