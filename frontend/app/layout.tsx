@@ -8,7 +8,7 @@ interface Props {
 const TopBar = () => {
     return (
         <div className="flex flex-col w-16 w-full">
-            <span className="font-bold text-3xl">March 16th, 2023</span>
+            <span className="font-bold text-3xl font-serif">March 16th, 2023</span>
         </div>
     )
 }

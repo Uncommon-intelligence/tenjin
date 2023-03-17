@@ -26,7 +26,7 @@ const ChatHistory = () => {
         <div className="flex flex-col gap-8">
             {history?.map(({ user, assistant, sources }) => (
                 <div className="flex flex-col gap-2 border-b border-[rgba(133,133,133,0.3)] pb-8">
-                    <strong className="text-xl text-primary-content">
+                    <strong className="text-xl text-primary-content font-serif">
                         {user}
                     </strong>
                     <strong className="mt-2 text-info font-semibold uppercase text-xs">Answer</strong>
@@ -34,7 +34,7 @@ const ChatHistory = () => {
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             children={assistant!}
-                            className="text-lg"
+                            className=""
                         />
                     </div>
                     {sources?.length > 0 &&
