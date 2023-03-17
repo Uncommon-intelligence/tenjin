@@ -2,6 +2,7 @@
 import { ChatContext } from "@/app/page";
 import axios from "axios";
 import { useContext, useRef } from "react";
+import { FaPaperPlane } from "react-icons/fa";
 
 const ChatForm = () => {
     const { onSubmit, conversationId, history } = useContext(ChatContext);
@@ -26,14 +27,21 @@ const ChatForm = () => {
 
     return (
         <form action="#" onSubmit={handleSubmit}>
-            <input
-                ref={chatRef}
-                name="chat"
-                type="text"
-                className="rounded rounded-full px-4 py-2 text-lg w-full border border-1 border-gray-600 bg-gray-800"
-                placeholder="... Ask me anything"
-                autoComplete="off"
-            />
+            <div className="form-control">
+                <div className="input-group">
+                    <input
+                        ref={chatRef}
+                        name="chat"
+                        type="text"
+                        className="input input-bordered input-primary w-full outline-none"
+                        placeholder="... Ask me anything"
+                        autoComplete="off"
+                    />
+                    <button className="btn">
+                        <FaPaperPlane />
+                    </button>
+                </div>
+            </div>
         </form>
     );
 };
