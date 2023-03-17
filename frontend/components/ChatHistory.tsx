@@ -1,5 +1,6 @@
 import { ChatContext } from "@/app/page";
 import { useContext } from "react";
+import { FaBookmark } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -26,9 +27,16 @@ const ChatHistory = () => {
         <div className="flex flex-col gap-8">
             {history?.map(({ user, assistant, sources }) => (
                 <div className="flex flex-col gap-2 border-b border-[rgba(133,133,133,0.3)] pb-8">
-                    <strong className="text-xl text-primary-content font-serif">
-                        {user}
-                    </strong>
+                    <div className="flex gap-2">
+                        <strong className="text-xl text-primary-content font-serif block flex-1">
+                            {user}
+                        </strong>
+                        <div className="tooltip tooltip-left h-5" data-tip="Save response">
+                        <button className="p-0 m-0 opacity-20 hover:opacity-100 h-5">
+                            <FaBookmark />
+                        </button>
+                        </div>
+                    </div>
                     <strong className="mt-2 text-info font-semibold uppercase text-xs">Answer</strong>
                     <div className="prose max-w-full">
                         <ReactMarkdown
