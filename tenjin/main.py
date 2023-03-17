@@ -8,6 +8,7 @@ from tenjin.conversation import load_conversation_chain, chat as chat_func
 import tenjin.question_answer
 import uuid
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 
 dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
 load_dotenv(dotenv_path)

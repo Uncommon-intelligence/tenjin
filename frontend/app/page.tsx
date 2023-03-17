@@ -59,21 +59,28 @@ export default function Home() {
     };
 
     return (
-        <main className={`max-w-4xl flex h-screen gap-6 flex-col m-auto border-x border-slate-800`}>
-            <ChatContext.Provider
-                value={{ onSubmit: handleSubmit, history, conversationId }}
-            >
+        <ChatContext.Provider
+            value={{ onSubmit: handleSubmit, history, conversationId }}
+        >
+            <div className="flex gap-4 h-full">
+            <div className="flex-1 flex flex-col space-y-4 max-w-[850px]">
                 <section
                     ref={chatWindow}
                     id="responses"
-                    className="w-full flex-1 overflow-y-auto p-8"
+                    className="bg-base-300 flex-1 overflow-y-scroll"
                 >
-                    <ChatHistory />
+                    <div className="max-h-[200px] p-4">
+                        <ChatHistory />
+                    </div>
                 </section>
-                <section id="chatbar" className="w-full p-8">
+                <section id="chatbar" className="w-full">
                     <ChatForm />
                 </section>
-            </ChatContext.Provider>
-        </main>
+            </div>
+            <div className="flex-1 bg-base-300 p-4">
+                <h1>yo</h1>
+            </div>
+            </div>
+        </ChatContext.Provider>
     );
 }
