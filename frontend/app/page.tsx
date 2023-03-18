@@ -1,6 +1,7 @@
 "use client";
 import ChatForm from "@/components/ChatForm";
 import ChatHistory from "@/components/ChatHistory";
+import PDFViewer from "@/components/PDFViewer";
 import { createContext, useEffect, useRef, useState } from "react";
 
 interface Source {
@@ -43,10 +44,10 @@ export const ChatContext = createContext<ChatProviderProps>({
 export default function Home() {
     const [history, setHistory] = useState<Conversation[]>([]);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    const chatWindow = useRef<any>()
+    // const chatWindow = useRef<any>()
 
     useEffect(() => {
-        chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
+        // chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
     }, [history])
 
     useEffect(() => {
@@ -62,10 +63,9 @@ export default function Home() {
         <ChatContext.Provider
             value={{ onSubmit: handleSubmit, history, conversationId }}
         >
-            <div className="flex gap-4 h-full">
             <div className="flex-1 flex flex-col space-y-4 max-w-[850px]">
                 <section
-                    ref={chatWindow}
+                    // ref={chatWindow}
                     id="responses"
                     className="bg-base-300 flex-1 overflow-y-scroll"
                 >
@@ -77,9 +77,9 @@ export default function Home() {
                     <ChatForm />
                 </section>
             </div>
+
             <div className="flex-1 bg-base-300 p-4">
-                <h1>yo</h1>
-            </div>
+                <PDFViewer pdfURL="/example.pdf" />
             </div>
         </ChatContext.Provider>
     );
