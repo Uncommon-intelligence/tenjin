@@ -7,3 +7,13 @@
 .font-serif {
     font-weight: 400;
 }
+
+.react-pdf__Page {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.annotationLayer {
+    display: none;
+}

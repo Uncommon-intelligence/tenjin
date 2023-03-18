@@ -1,3 +1,4 @@
+import Flyout from '@/components/layout/Flyout'
 import Navbar from '@/components/layout/navbar'
 import './globals.css'
 
@@ -13,36 +14,29 @@ const TopBar = () => {
     )
 }
 
-const CaseList = () => {
-    return (
-        <div className="flex flex-col w-[200px] h-full w-32 space-y-4">
-            <div className="flex-1 bg-base-200 p-4">
-                cases
-            </div>
-            <button className='btn btn-primary'>Add Case</button>
-        </div>
-    )
-}
 
 export default function RootLayout({children}: Props): React.ReactElement {
   return (
-    <html lang="en" data-theme="business">
+    <html lang="en" data-theme="dark">
         {/*
             <head /> will contain the components returned by the nearest parent
             head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
         */}
         <head />
-        <body className='flex'>
-            <Navbar />
-            <div className='w-full h-screen p-4 overflow-hidden flex flex-col space-y-4'>
-                <TopBar />
-                <div className='flex flex-row h-full space-x-4'>
-                    <CaseList />
-                    <main className="flex-1">
-                        {children}
-                    </main>
+        <body>
+            <Flyout>
+                <div className="h-screen flex overflow-hidden">
+                    <Navbar />
+                    <div className='w-full p-4 overflow-hidden flex flex-col gap-4'>
+                        <TopBar />
+                        <div className='flex flex-1 gap-4 h-0'>
+                            <main className="flex flex-1 gap-4">
+                                {children}
+                            </main>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </Flyout>
         </body>
     </html>
   )

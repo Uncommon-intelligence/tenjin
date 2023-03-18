@@ -1,6 +1,7 @@
 "use client";
 import ChatForm from "@/components/ChatForm";
 import ChatHistory from "@/components/ChatHistory";
+import PDFViewer from "@/components/PDFViewer";
 import { createContext, useEffect, useRef, useState } from "react";
 
 interface Source {
@@ -62,7 +63,6 @@ export default function Home() {
         <ChatContext.Provider
             value={{ onSubmit: handleSubmit, history, conversationId }}
         >
-            <div className="flex gap-4 h-full">
             <div className="flex-1 flex flex-col space-y-4 max-w-[850px]">
                 <section
                     ref={chatWindow}
@@ -77,9 +77,9 @@ export default function Home() {
                     <ChatForm />
                 </section>
             </div>
+
             <div className="flex-1 bg-base-300 p-4">
-                <h1>yo</h1>
-            </div>
+                <PDFViewer pdfURL="/example.pdf" />
             </div>
         </ChatContext.Provider>
     );

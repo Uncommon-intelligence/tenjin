@@ -16,6 +16,7 @@
         "llms",
         "subfolders",
         "tenjin",
+        "texthighlighter",
         "Weaviate"
     ]
 }
