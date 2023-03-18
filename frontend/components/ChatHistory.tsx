@@ -13,9 +13,9 @@ const SourceLink = ({ source }: any) => {
             href={link}
             target="_blank"
             key={title}
-            className="text-sm text-secondary border border-secondary px-2 py-1 rounded-full hover:bg-primary transition-all hover:text-primary-content"
+            className="text-sm text-secondary border border-secondary px-2 py-1 rounded-full hover:bg-primary transition-all hover:text-primary-content whitespace-nowrap overflow-hidden overflow-ellipsis"
         >
-            {title.slice(0, 20)}
+            {title}
         </a>
     )
 }
@@ -31,7 +31,7 @@ const ChatHistory = () => {
                         <strong className="text-xl text-primary-content font-serif block flex-1">
                             {user}
                         </strong>
-                        <div className="tooltip tooltip-left h-5" data-tip="Save response">
+                        <div className="tooltip tooltip-left" data-tip="Save response">
                         <button className="p-0 m-0 opacity-20 hover:opacity-100 h-5">
                             <FaBookmark />
                         </button>
