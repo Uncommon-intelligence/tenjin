@@ -1,3 +1,4 @@
+import Flyout from '@/components/layout/Flyout'
 import Navbar from '@/components/layout/navbar'
 import './globals.css'
 
@@ -13,16 +14,6 @@ const TopBar = () => {
     )
 }
 
-const CaseList = () => {
-    return (
-        <div className="flex flex-col w-[200px] gap-4">
-            <div className="flex-1 bg-base-200 p-4">
-                cases
-            </div>
-            <button className='btn btn-primary'>Add Case</button>
-        </div>
-    )
-}
 
 export default function RootLayout({children}: Props): React.ReactElement {
   return (
@@ -33,18 +24,19 @@ export default function RootLayout({children}: Props): React.ReactElement {
         */}
         <head />
         <body>
-            <div className="h-screen flex overflow-hidden">
-                <Navbar />
-                <div className='w-full p-4 overflow-hidden flex flex-col gap-4'>
-                    <TopBar />
-                    <div className='flex flex-1 gap-4 h-0'>
-                        <CaseList />
-                        <main className="flex flex-1 gap-4">
-                            {children}
-                        </main>
+            <Flyout>
+                <div className="h-screen flex overflow-hidden">
+                    <Navbar />
+                    <div className='w-full p-4 overflow-hidden flex flex-col gap-4'>
+                        <TopBar />
+                        <div className='flex flex-1 gap-4 h-0'>
+                            <main className="flex flex-1 gap-4">
+                                {children}
+                            </main>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Flyout>
         </body>
     </html>
   )
