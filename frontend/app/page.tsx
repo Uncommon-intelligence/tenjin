@@ -44,10 +44,10 @@ export const ChatContext = createContext<ChatProviderProps>({
 export default function Home() {
     const [history, setHistory] = useState<Conversation[]>([]);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    // const chatWindow = useRef<any>()
+    const chatWindow = useRef<any>()
 
     useEffect(() => {
-        // chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
+        chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
     }, [history])
 
     useEffect(() => {
@@ -65,7 +65,7 @@ export default function Home() {
         >
             <div className="flex-1 flex flex-col space-y-4 max-w-[850px]">
                 <section
-                    // ref={chatWindow}
+                    ref={chatWindow}
                     id="responses"
                     className="bg-base-300 flex-1 overflow-y-scroll"
                 >

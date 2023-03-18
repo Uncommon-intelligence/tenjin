@@ -3,6 +3,9 @@ from typing import Tuple, List
 from langchain.agents import initialize_agent, Tool
 from langchain.llms import OpenAIChat
 from tenjin.actions.bing_search import BingSearch
+from langchain.utilities import WolframAlphaAPIWrapper
+
+wolfram = WolframAlphaAPIWrapper()
 
 bing = BingSearch()
 llm = OpenAIChat(temperature=0)
@@ -13,6 +16,11 @@ TOOLS = [
         description = bing.description,
         func=bing.run
     ),
+    Tool(
+        name ="Wolfram Alpha",
+        description = "Wolfram Alpha is a computational knowledge engine that can answer questions about math, science, weather, and more.",
+        func=wolfram.run
+    )
 ]
 
 AVAILABLE_TOOLS = " ".join([f"{tool.name}: {tool.description}\n" for tool in TOOLS])
