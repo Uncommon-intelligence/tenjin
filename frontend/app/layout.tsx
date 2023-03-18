@@ -26,7 +26,7 @@ const CaseList = () => {
 
 export default function RootLayout({children}: Props): React.ReactElement {
   return (
-    <html lang="en" data-theme="business">
+    <html lang="en" data-theme="dark">
         {/*
             <head /> will contain the components returned by the nearest parent
             head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
