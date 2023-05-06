@@ -1,7 +1,6 @@
 "use client";
-import ChatForm from "@/components/ChatForm";
-import ChatHistory from "@/components/ChatHistory";
 import PDFViewer from "@/components/PDFViewer";
+import { Chat } from "@/components/chat";
 import { createContext, useEffect, useRef, useState } from "react";
 
 interface Source {
@@ -14,7 +13,7 @@ interface Source {
         source: string;
         title: string;
         content: string;
-    }
+    };
 }
 
 type Conversation = {
@@ -22,10 +21,10 @@ type Conversation = {
     assistant?: string;
     system?: string;
     sources: Source[];
-}
+};
 
 interface ConversationResponse {
-    data: Conversation[]
+    data: Conversation[];
     conversation_id: string;
 }
 
@@ -44,15 +43,15 @@ export const ChatContext = createContext<ChatProviderProps>({
 export default function Home() {
     const [history, setHistory] = useState<Conversation[]>([]);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    const chatWindow = useRef<any>()
+    const chatWindow = useRef<any>();
 
     useEffect(() => {
         chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
-    }, [history])
+    }, [history]);
 
     useEffect(() => {
-        console.log(conversationId)
-    }, [conversationId])
+        console.log(conversationId);
+    }, [conversationId]);
 
     const handleSubmit = (response: Conversation[], conversationId: string) => {
         setHistory(response);
@@ -63,20 +62,7 @@ export default function Home() {
         <ChatContext.Provider
             value={{ onSubmit: handleSubmit, history, conversationId }}
         >
-            <div className="flex-1 flex flex-col space-y-4 max-w-[850px]">
-                <section
-                    ref={chatWindow}
-                    id="responses"
-                    className="bg-base-300 flex-1 overflow-y-scroll"
-                >
-                    <div className="max-h-[200px] p-4">
-                        <ChatHistory />
-                    </div>
-                </section>
-                <section id="chatbar" className="w-full">
-                    <ChatForm />
-                </section>
-            </div>
+            <Chat chatWindow={chatWindow} />
 
             <div className="flex-1 bg-base-300 p-4">
                 <PDFViewer pdfURL="/example.pdf" />
