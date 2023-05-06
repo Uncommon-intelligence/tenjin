@@ -40,26 +40,47 @@ export const ChatContext = createContext<ChatProviderProps>({
     conversationId: null,
 });
 
-const STUB_MESSAGES = [
-    {
-        user: "Tim",
-        assistant: "Frank",
-        system: "wtf",
-        sources: [
-            {
-                page_content: "aaaa",
-                lookup_str: "aaaa",
-                lookup_index: 2,
-                metadata: {
-                    type: "aaa",
-                    term: "aaa",
-                    source: "aaa",
-                    title: "aaa",
-                    content: "aaa",
-                },
-            },
-        ],
-    },
+const STUB_MESSAGES: Conversation[] = [
+    // TODO: Uncomment this for fast testing of styles. Should be deleted ASAP
+    // {
+    //     user: "Tim",
+    //     assistant: "Frank",
+    //     system: "wtf",
+    //     sources: [
+    //         {
+    //             page_content: "aaaa",
+    //             lookup_str: "aaaa",
+    //             lookup_index: 2,
+    //             metadata: {
+    //                 type: "aaa",
+    //                 term: "aaa",
+    //                 source: "aaa",
+    //                 title: "aaa",
+    //                 content: "aaa",
+    //             },
+    //         },
+    //     ],
+    // },
+    // {
+    //     user: "AI",
+    //     assistant:
+    //         "Some content? I'm guessing this is the key for the content?",
+    //     system: "wtf",
+    //     sources: [
+    //         {
+    //             page_content: "aaaa",
+    //             lookup_str: "aaaa",
+    //             lookup_index: 2,
+    //             metadata: {
+    //                 type: "aaa",
+    //                 term: "aaa",
+    //                 source: "aaa",
+    //                 title: "aaa",
+    //                 content: "aaa",
+    //             },
+    //         },
+    //     ],
+    // },
 ];
 
 export default function Home() {

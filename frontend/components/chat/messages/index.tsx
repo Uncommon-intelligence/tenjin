@@ -1,6 +1,6 @@
 import { ChatContext } from "@/app/page";
 import { FC, useContext } from "react";
-import UserMessage from "./UserMessage";
+import MessageBubble from "./MessageBubble";
 
 interface ChatMessagesProps {
     chatWindow: any;
@@ -17,9 +17,9 @@ const ChatMessages: FC<ChatMessagesProps> = (props) => {
             className="flex-1 overflow-y-scroll"
         >
             <div className="max-h-[200px] p-4">
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-[18px]">
                     {history?.map((message, index) => (
-                        <UserMessage key={index} {...message} />
+                        <MessageBubble key={index} {...message} />
                     ))}
                 </div>
             </div>

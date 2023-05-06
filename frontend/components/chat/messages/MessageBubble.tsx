@@ -4,41 +4,57 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Source } from "@/app/page";
 import Avatar from "./Avatar";
+import SourceLink from "./SourceLink";
 
-interface UserMessageProps {
+const POSITIONS = {
+    LEFT: "LEFT",
+    RIGHT: "RIGHT",
+} as const;
+
+type Position = (typeof POSITIONS)[keyof typeof POSITIONS];
+
+interface MessageBubbleProps {
     user?: string;
     assistant?: string;
     sources: Source[];
 }
 
-const SourceLink: FC = ({ source }: any) => {
-    if (!source) return null;
-    const { snippet, title, link } = source;
+interface BubbleThingyProps {
+    position: Position;
+}
+
+const BubbleThingy: FC<BubbleThingyProps> = (props) => {
+    const { position } = props;
+    const sideBorderStyles =
+        position === POSITIONS.LEFT
+            ? "border-r-dark-400 border-t-dark-400 border-l-transparent"
+            : "border-l-dark-300 border-t-dark-300 border-r-transparent";
 
     return (
-        <a
-            href={link}
-            target="_blank"
-            rel="noreferrer"
-            key={title}
-            className="text-sm text-secondary border border-secondary px-2 py-1 rounded-full hover:bg-primary transition-all hover:text-primary-content whitespace-nowrap overflow-hidden overflow-ellipsis"
-        >
-            {title}
-        </a>
+        <div
+            className={`w-0 h-0 border-[6px] ${sideBorderStyles} border-b-transparent`}
+        />
     );
 };
 
-const BubbleThingy: FC = () => (
-    <div className="w-0 h-0 border-[6px] border-r-dark-400 border-l-transparent border-t-dark-400 border-b-transparent" />
-);
-
-const UserMessage: FC<UserMessageProps> = (props) => {
+const MessageBubble: FC<MessageBubbleProps> = (props) => {
     const { user, assistant, sources } = props;
 
+    // TODO: Replace this with better / clearer logic. This is for scaffolding purposes only.
+    const isAiMessage = user === "AI";
+
+    const wrapperStyle = isAiMessage ? "flex pl-[48px]" : "flex pr-[48px]";
+
+    const backgroundStyle = isAiMessage
+        ? "rounded-tr-none bg-dark-300"
+        : "rounded-tl-none bg-dark-400";
+
     return (
-        <div className="flex pr-[48px]">
-            <BubbleThingy />
-            <div className="flex flex-col grow gap-2 rounded-[6px] rounded-tl-none bg-dark-400 py-[18px] px-[18px]">
+        <div className={wrapperStyle}>
+            {!isAiMessage && <BubbleThingy position={POSITIONS.LEFT} />}
+            <div
+                className={`flex flex-col grow gap-2 rounded-[6px] ${backgroundStyle} py-[18px] px-[18px]`}
+            >
                 <div className="flex">
                     <Avatar user={user} />
                     <div className="px-[18px] grow">
@@ -68,8 +84,9 @@ const UserMessage: FC<UserMessageProps> = (props) => {
                     </div>
                 )}
             </div>
+            {isAiMessage && <BubbleThingy position={POSITIONS.RIGHT} />}
         </div>
     );
 };
 
-export default UserMessage;
+export default MessageBubble;
