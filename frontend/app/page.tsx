@@ -3,7 +3,7 @@ import PDFViewer from "@/components/PDFViewer";
 import { Chat } from "@/components/chat";
 import { createContext, useEffect, useRef, useState } from "react";
 
-interface Source {
+export interface Source {
     page_content: string;
     lookup_str: string;
     lookup_index: number;
@@ -16,7 +16,7 @@ interface Source {
     };
 }
 
-type Conversation = {
+export type Conversation = {
     user?: string;
     assistant?: string;
     system?: string;
@@ -87,7 +87,7 @@ export default function Home() {
             <Chat chatWindow={chatWindow} />
 
             <div className="flex-1 bg-base-300 p-4">
-                {/* <PDFViewer pdfURL="/example.pdf" /> */}
+                <PDFViewer pdfURL="/example.pdf" />
             </div>
         </ChatContext.Provider>
     );
