@@ -40,8 +40,30 @@ export const ChatContext = createContext<ChatProviderProps>({
     conversationId: null,
 });
 
+const STUB_MESSAGES = [
+    {
+        user: "Tim",
+        assistant: "Frank",
+        system: "wtf",
+        sources: [
+            {
+                page_content: "aaaa",
+                lookup_str: "aaaa",
+                lookup_index: 2,
+                metadata: {
+                    type: "aaa",
+                    term: "aaa",
+                    source: "aaa",
+                    title: "aaa",
+                    content: "aaa",
+                },
+            },
+        ],
+    },
+];
+
 export default function Home() {
-    const [history, setHistory] = useState<Conversation[]>([]);
+    const [history, setHistory] = useState<Conversation[]>(STUB_MESSAGES);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const chatWindow = useRef<any>();
 
@@ -65,7 +87,7 @@ export default function Home() {
             <Chat chatWindow={chatWindow} />
 
             <div className="flex-1 bg-base-300 p-4">
-                <PDFViewer pdfURL="/example.pdf" />
+                {/* <PDFViewer pdfURL="/example.pdf" /> */}
             </div>
         </ChatContext.Provider>
     );
