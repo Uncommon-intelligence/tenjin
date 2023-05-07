@@ -28,7 +28,7 @@ export default function RootLayout({ children }: Props): React.ReactElement {
                 <Flyout>
                     <div className="h-screen flex overflow-hidden">
                         <Navbar />
-                        <div className="w-full p-4 overflow-hidden flex flex-col gap-4">
+                        <div className="w-full p-4 overflow-hidden flex flex-col gap-4 bg-dark-200">
                             <TopBar />
                             <div className="flex flex-1 gap-4 h-0">
                                 <main className="flex flex-1">{children}</main>

@@ -46,11 +46,14 @@ const MessageBubble: FC<MessageBubbleProps> = (props) => {
     const wrapperStyle = isAiMessage ? "flex pl-[48px]" : "flex pr-[48px]";
 
     const backgroundStyle = isAiMessage
-        ? "rounded-tr-none bg-dark-300"
-        : "rounded-tl-none bg-dark-400";
+        ? "rounded-tr-none bg-dark-300 text-light-600"
+        : "rounded-tl-none bg-dark-400 text-light-800";
 
     return (
-        <div className={wrapperStyle}>
+        <div
+            className={`drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]
+        ${wrapperStyle}`}
+        >
             {!isAiMessage && <BubbleThingy position={POSITIONS.LEFT} />}
             <div
                 className={`flex flex-col grow gap-2 rounded-[6px] ${backgroundStyle} py-[18px] px-[18px]`}
