@@ -1,10 +1,9 @@
 "use client";
-import ChatForm from "@/components/ChatForm";
-import ChatHistory from "@/components/ChatHistory";
 import PDFViewer from "@/components/PDFViewer";
+import { Chat } from "@/components/chat";
 import { createContext, useEffect, useRef, useState } from "react";
 
-interface Source {
+export interface Source {
     page_content: string;
     lookup_str: string;
     lookup_index: number;
@@ -14,18 +13,18 @@ interface Source {
         source: string;
         title: string;
         content: string;
-    }
+    };
 }
 
-type Conversation = {
+export type Conversation = {
     user?: string;
     assistant?: string;
     system?: string;
     sources: Source[];
-}
+};
 
 interface ConversationResponse {
-    data: Conversation[]
+    data: Conversation[];
     conversation_id: string;
 }
 
@@ -41,18 +40,61 @@ export const ChatContext = createContext<ChatProviderProps>({
     conversationId: null,
 });
 
+const STUB_MESSAGES: Conversation[] = [
+    // TODO: Uncomment this for fast testing of styles. Should be deleted ASAP
+    // {
+    //     user: "Tim",
+    //     assistant: "Frank",
+    //     system: "wtf",
+    //     sources: [
+    //         {
+    //             page_content: "aaaa",
+    //             lookup_str: "aaaa",
+    //             lookup_index: 2,
+    //             metadata: {
+    //                 type: "aaa",
+    //                 term: "aaa",
+    //                 source: "aaa",
+    //                 title: "aaa",
+    //                 content: "aaa",
+    //             },
+    //         },
+    //     ],
+    // },
+    // {
+    //     user: "AI",
+    //     assistant:
+    //         "Some content? I'm guessing this is the key for the content?",
+    //     system: "wtf",
+    //     sources: [
+    //         {
+    //             page_content: "aaaa",
+    //             lookup_str: "aaaa",
+    //             lookup_index: 2,
+    //             metadata: {
+    //                 type: "aaa",
+    //                 term: "aaa",
+    //                 source: "aaa",
+    //                 title: "aaa",
+    //                 content: "aaa",
+    //             },
+    //         },
+    //     ],
+    // },
+];
+
 export default function Home() {
-    const [history, setHistory] = useState<Conversation[]>([]);
+    const [history, setHistory] = useState<Conversation[]>(STUB_MESSAGES);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    const chatWindow = useRef<any>()
+    const chatWindow = useRef<any>();
 
     useEffect(() => {
         chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
-    }, [history])
+    }, [history]);
 
     useEffect(() => {
-        console.log(conversationId)
-    }, [conversationId])
+        console.log(conversationId);
+    }, [conversationId]);
 
     const handleSubmit = (response: Conversation[], conversationId: string) => {
         setHistory(response);
@@ -63,20 +105,7 @@ export default function Home() {
         <ChatContext.Provider
             value={{ onSubmit: handleSubmit, history, conversationId }}
         >
-            <div className="flex-1 flex flex-col space-y-4 max-w-[850px]">
-                <section
-                    ref={chatWindow}
-                    id="responses"
-                    className="bg-base-300 flex-1 overflow-y-scroll"
-                >
-                    <div className="max-h-[200px] p-4">
-                        <ChatHistory />
-                    </div>
-                </section>
-                <section id="chatbar" className="w-full">
-                    <ChatForm />
-                </section>
-            </div>
+            <Chat chatWindow={chatWindow} />
 
             <div className="flex-1 bg-base-300 p-4">
                 <PDFViewer pdfURL="/example.pdf" />
